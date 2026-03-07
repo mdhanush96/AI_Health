@@ -1,0 +1,397 @@
+================================================================================
+                         MedAI — Project Details
+              AI-Powered Symptom-Based Disease Prediction System
+================================================================================
+
+PROJECT NAME    : MedAI
+TYPE            : Full-Stack Web Application (Monorepo)
+ARCHITECTURE    : Client-Server with ML Pipeline
+STATUS          : Active Development
+LICENSE         : Private
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+MedAI is an AI-powered medical assistant that predicts diseases from
+natural-language symptom descriptions. It combines a fine-tuned ClinicalBERT
+classifier with a hybrid Retrieval-Augmented Generation (RAG) pipeline to
+deliver structured, evidence-grounded medical explanations.
+
+Core capabilities:
+  - Symptom-based disease prediction (top-3 with confidence scores)
+  - Medical report summarization (PDF / TXT / image via OCR)
+  - Emergency keyword detection with helpline routing
+  - Risk classification (High / Moderate / Low probability tiers)
+  - Conversational greeting & small-talk detection
+  - Multi-conversation chat UI with persistent history
+  - User authentication, profile management, and prediction audit trail
+
+================================================================================
+2. TECH STACK
+================================================================================
+
+Layer              | Technology                        | Version
+-------------------|-----------------------------------|-----------------
+Frontend           | React, React Router, Axios        | 18.2, v7, 1.13
+Backend            | Django, Django REST Framework      | 5.x, 3.15+
+ML Classification  | ClinicalBERT (fine-tuned)         | HuggingFace
+Text Generation    | FLAN-T5-base (seq2seq)            | HuggingFace
+Embeddings         | all-MiniLM-L6-v2 (sentence-trans) | HuggingFace
+Vector Search      | FAISS (CPU)                       | 1.7+
+Medical NER        | SciSpacy (en_core_sci_md)         | 0.5+
+OCR                | EasyOCR (primary), pytesseract    | latest
+PDF Extraction     | pdfplumber, PyPDF2 (fallback)     | 0.10+, 3.0+
+Database           | SQLite (dev) / MySQL (prod)       | default
+Auth               | DRF TokenAuthentication           | built-in
+CORS               | django-cors-headers               | 4.4+
+Production Server  | Gunicorn                          | 22.0+
+Runtime            | Python 3.10+, Node.js 16+         | —
+
+================================================================================
+3. DIRECTORY STRUCTURE
+================================================================================
+
+health_ai_project/
+├── backend/
+│   ├── manage.py                    # Django management entry point
+│   ├── requirements.txt             # Python dependencies
+│   ├── db.sqlite3                   # Dev SQLite database
+│   ├── api/                         # Django REST API app
+│   │   ├── models.py                # UserProfile, PredictionLog
+│   │   ├── views.py                 # Predict, Auth, History endpoints
+│   │   ├── serializers.py           # DRF serializers
+│   │   ├── urls.py                  # API route definitions
+│   │   └── permissions.py           # Custom permission classes
+│   ├── health_ai/                   # Django project settings
+│   │   ├── settings.py              # Config (DB, CORS, Auth, Media)
+│   │   └── urls.py                  # Root URL routing
+│   └── ml_engine/                   # Machine Learning core
+│       ├── config.py                # ~30 env-var configurable params
+│       ├── predictor.py             # ClinicalBERT inference wrapper
+│       ├── model_loader.py          # Thread-safe singleton model loaders
+│       ├── symptom_verifier.py      # Post-classification re-ranking
+│       ├── medical_ner.py           # SciSpacy biomedical NER
+│       ├── report_summarizer.py     # Multi-pass FLAN-T5 summarization
+│       ├── utils.py                 # File processing (PDF/image/text)
+│       ├── disease_info.json        # Static disease reference data
+│       ├── clinicalbert-disease/    # Fine-tuned ClinicalBERT weights
+│       ├── knowledge_base/          # 22 per-disease JSON files
+│       └── rag/                     # RAG pipeline components
+│           ├── retriever.py         # FAISS vector retrieval
+│           ├── generator.py         # FLAN-T5 text generation
+│           ├── pipeline.py          # RAG orchestrator + cache
+│           ├── faiss_index.bin      # Pre-built FAISS vector index
+│           └── metadata.pkl         # Chunk metadata for FAISS
+├── frontend/
+│   ├── package.json                 # Node dependencies
+│   ├── public/index.html            # HTML shell
+│   └── src/
+│       ├── App.js                   # React Router config, protected routes
+│       ├── index.js                 # React DOM entry point
+│       ├── components/
+│       │   ├── Sidebar.js           # ChatGPT-style dark sidebar
+│       │   ├── ChatBox.js           # Input bar + file upload
+│       │   ├── ChatMessage.js       # Message bubble renderer
+│       │   ├── ResultCard.js        # Disease prediction card
+│       │   └── History.js           # Prediction history table
+│       ├── pages/
+│       │   ├── LoginPage.js         # Login form (split-panel UI)
+│       │   ├── RegisterPage.js      # Registration form
+│       │   └── ProfilePage.js       # User health profile
+│       ├── services/
+│       │   ├── api.js               # Axios instance (predict, health)
+│       │   └── auth.js              # Token mgmt, auth API calls
+│       └── context/
+│           └── AuthContext.js       # React Context (user state)
+└── KnowledgeBase/                   # Standalone copy of disease JSONs
+
+================================================================================
+4. API ENDPOINTS
+================================================================================
+
+Method  Endpoint                Auth Required   Description
+------  ----------------------  -------------   --------------------------------
+POST    /api/predict/           No              ClinicalBERT-only classification
+POST    /api/predict-rag/       No              Full hybrid pipeline (main entry)
+GET     /api/health/            No              Health check (GPU, model status)
+GET     /api/history/           No              Last 50 prediction logs
+POST    /api/auth/register/     No              User registration → token
+POST    /api/auth/login/        No              User login → token
+POST    /api/auth/logout/       Yes             Deletes auth token
+GET/PUT /api/auth/profile/      Yes             Retrieve / update profile
+GET     /                       No              App info (version, endpoints)
+
+Primary frontend entry point: POST /api/predict-rag/
+  - Accepts: { "symptoms": "...", "file": <upload> }
+  - Handles: symptom prediction, report summarization, greetings
+  - Returns: structured JSON with predictions, risk levels, RAG explanations
+
+================================================================================
+5. ML PIPELINE — PREDICTION FLOW
+================================================================================
+
+User Input (symptoms / report file)
+        │
+        ▼
+┌─────────────────────────┐
+│  Greeting Detection     │  Regex-based; returns friendly text if matched
+│  (non-medical filter)   │
+└────────┬────────────────┘
+         │ (medical input)
+         ▼
+┌─────────────────────────┐
+│  File Processing        │  PDF → pdfplumber/PyPDF2
+│  (if file attached)     │  Image → EasyOCR/pytesseract
+└────────┬────────────────┘  Text  → UTF-8 decode
+         │
+         ▼
+┌─────────────────────────┐
+│  Emergency Detection    │  Keyword scan (chest pain, seizure, etc.)
+│                         │  → flags is_emergency + helpline numbers
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  ClinicalBERT           │  Fine-tuned sequence classifier
+│  Classification         │  → top-3 diseases + softmax confidence
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  Symptom Verification   │  Compares user symptoms vs knowledge base
+│  (Re-ranking Layer)     │  Word overlap + phrase match + synonyms
+│                         │  Score = 60% model + 40% symptom match
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  RAG Pipeline           │
+│  ├─ KB Lookup           │  Direct JSON knowledge base query
+│  ├─ FAISS Retrieval     │  MiniLM embedding → vector search
+│  └─ FLAN-T5 Generation  │  Chunk-based structured explanation
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  Response Assembly      │  Risk classification + emergency flags
+│                         │  + RAG explanation + disclaimers
+└─────────────────────────┘
+
+================================================================================
+6. ML PIPELINE — REPORT SUMMARIZATION FLOW
+================================================================================
+
+Uploaded File (PDF / Image / TXT)
+        │
+        ▼
+┌─────────────────────────┐
+│  Text Extraction        │  pdfplumber → PyPDF2 → EasyOCR → tesseract
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  Intent Detection       │  Regex patterns: "summarize", "what does
+│                         │  this report say", etc.
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  Multi-Pass T5 QA       │  5 passes: patient info, diagnosis,
+│                         │  findings, medications, recommendations
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  Regex Extraction       │  Patient demographics, diagnoses,
+│                         │  medications, test results
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  SciSpacy NER           │  Biomedical entity extraction:
+│                         │  diseases, drugs, symptoms, tests,
+│                         │  procedures, anatomy
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  Merge & Structure      │  Combines all extractions into
+│                         │  unified structured summary JSON
+└─────────────────────────┘
+
+================================================================================
+7. DATA MODELS
+================================================================================
+
+UserProfile (extends Django User — OneToOneField)
+├── phone              : CharField(20)
+├── date_of_birth      : DateField (nullable)
+├── gender             : CharField (male/female/other/prefer_not_to_say)
+├── blood_group        : CharField (A+/A-/B+/B-/AB+/AB-/O+/O-/unknown)
+├── height_cm          : DecimalField (nullable)
+├── weight_kg          : DecimalField (nullable)
+├── allergies          : TextField (nullable)
+├── medical_conditions : TextField (nullable)
+├── emergency_contact  : CharField(20, nullable)
+├── address            : TextField (nullable)
+└── avatar_initial     : CharField(2) — auto-generated from username
+
+PredictionLog
+├── symptoms           : TextField
+├── predicted_disease  : CharField(200)
+├── confidence         : FloatField
+├── risk_level         : CharField(50)
+├── is_emergency       : BooleanField (default=False)
+├── created_at         : DateTimeField (auto, indexed)
+└── Meta: ordering = ['-created_at']
+
+================================================================================
+8. AUTHENTICATION FLOW
+================================================================================
+
+Registration:
+  POST /api/auth/register/  { username, email, password }
+    → Creates User + UserProfile + Token
+    → Returns { token, user: { id, username, email } }
+
+Login:
+  POST /api/auth/login/  { username, password }
+    → Authenticates credentials
+    → Returns { token, user: { id, username, email } }
+
+Session Management:
+  - Token stored in localStorage (key: medai_token)
+  - Axios interceptor attaches "Authorization: Token <key>" header
+  - Protected routes wrapped in <RequireAuth> component
+  - Public-only routes wrapped in <PublicOnly> component
+
+Logout:
+  POST /api/auth/logout/  (requires Token header)
+    → Deletes server-side token
+    → Clears localStorage (token + user data)
+
+================================================================================
+9. KNOWLEDGE BASE
+================================================================================
+
+Two-tier knowledge system covering 22 diseases:
+
+Tier 1 — disease_info.json (compact reference)
+  Per disease: { description, common_symptoms[], advice }
+
+Tier 2 — Per-disease JSON files (knowledge_base/*.json)
+  Per disease: { Overview, Symptoms, Causes, Treatment,
+                 When to See a Doctor, Preventions }
+
+Diseases Covered:
+  Allergy, Arthritis, Bronchial Asthma, Cervical Spondylosis,
+  Chicken Pox, Common Cold, Dengue, Diabetes, Drug Reaction,
+  Fungal Infection, GERD, Hypertension, Impetigo, Jaundice,
+  Malaria, Migraine, Peptic Ulcer Disease, Pneumonia, Psoriasis,
+  Typhoid, Urinary Tract Infection, Varicose Veins
+
+FAISS Vector Index:
+  - Pre-built from knowledge base chunks
+  - Stored as faiss_index.bin + metadata.pkl
+  - Queried via MiniLM-L6-v2 sentence embeddings
+
+================================================================================
+10. DESIGN PATTERNS & ARCHITECTURE DECISIONS
+================================================================================
+
+Pattern                     | Implementation
+----------------------------|-----------------------------------------------
+Singleton Model Loading     | Thread-safe double-check locking for all ML
+                            | models. Loaded once per process, shared across
+                            | requests. Prevents redundant GPU memory alloc.
+                            |
+Config-Driven Architecture  | Central config.py with ~30 env-var overrides
+                            | (MEDAI_DEVICE, MEDAI_MODEL_PRECISION, etc.)
+                            |
+Graceful Degradation        | Fallback chains at every layer:
+                            |   pdfplumber → PyPDF2
+                            |   EasyOCR → pytesseract
+                            |   GPU → CPU
+                            |   RAG fails → classification-only
+                            |
+In-Memory Response Cache    | SHA256-keyed LRU cache for RAG responses
+                            | TTL: 300s, max 200 entries, thread-safe
+                            |
+Two-Pass Verification       | ClinicalBERT predictions re-ranked by
+                            | symptom verification (KB matching + synonyms)
+                            | Score = 60% model + 40% symptom match
+                            |
+Conversational UX           | Greeting/small-talk detection prevents ML
+                            | pipeline from running on non-medical inputs.
+                            | Medical keyword detection overrides greetings.
+                            |
+Inline CSS                  | Frontend uses entirely inline React styles
+                            | (no CSS files or framework). CSS keyframes
+                            | injected programmatically.
+                            |
+localStorage Persistence    | Conversations, auth tokens, and user info
+                            | stored client-side in localStorage
+                            |
+Half-Precision Support      | Optional float16 model casting via
+                            | MEDAI_MODEL_PRECISION env var for lower VRAM
+
+================================================================================
+11. DEPENDENCIES
+================================================================================
+
+BACKEND (Python):
+  django>=5.0,<6.0          djangorestframework>=3.15
+  django-cors-headers>=4.4  torch>=2.2
+  transformers>=4.40         sentencepiece>=0.2
+  faiss-cpu>=1.7             PyPDF2>=3.0
+  pdfplumber>=0.10           Pillow>=10.0
+  pytesseract>=0.3           scispacy>=0.5
+  spacy>=3.7                 numpy>=1.24
+  mysqlclient>=2.2           gunicorn>=22.0
+  python-dotenv>=1.0
+
+FRONTEND (Node.js):
+  react@^18.2.0              react-dom@^18.2.0
+  react-router-dom@^7.13.1   axios@^1.13.6
+  react-scripts@5.0.1
+
+================================================================================
+12. SETUP & RUN
+================================================================================
+
+Backend:
+  cd health_ai_project/backend
+  pip install -r requirements.txt
+  python -m spacy download en_core_sci_md
+  python manage.py migrate
+  python manage.py runserver
+
+Frontend:
+  cd health_ai_project/frontend
+  npm install
+  npm start
+
+Environment Variables (optional):
+  MEDAI_DEVICE             = cpu | cuda           (default: auto-detect)
+  MEDAI_MODEL_PRECISION    = float32 | float16    (default: float32)
+  MEDAI_CACHE_TTL          = <seconds>            (default: 300)
+  MEDAI_CACHE_MAX_SIZE     = <count>              (default: 200)
+  MEDAI_FAISS_TOP_K        = <count>              (default: 5)
+
+================================================================================
+13. KEY METRICS
+================================================================================
+
+  ClinicalBERT Accuracy     : 80.6% (fine-tuned on 22 disease classes)
+  Supported Diseases        : 22
+  API Endpoints             : 9
+  Frontend Components       : 5 components + 3 pages + 1 context
+  Knowledge Base Files      : 22 per-disease JSON files + 1 summary JSON
+  Prediction Timeout        : 120s (frontend Axios config)
+  Cache TTL                 : 300s (RAG response cache)
+  Max Cache Entries         : 200
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

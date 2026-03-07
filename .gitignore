@@ -1,0 +1,70 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ========================
+# Django
+# ========================
+db.sqlite3
+db.sqlite3-journal
+*.log
+logs/
+media/
+staticfiles/
+
+# ========================
+# Environment & Secrets
+# ========================
+.env
+.env.local
+.env.*.local
+.env.production
+
+# ========================
+# Frontend (React)
+# ========================
+node_modules/
+health_ai_project/frontend/build/
+
+# ========================
+# ML Model Files (too large for Git)
+# ========================
+*.safetensors
+*.bin
+*.pkl
+*.h5
+*.pt
+*.pth
+*.onnx
+clinicalbert-disease.zip
+
+# ========================
+# IDE / OS
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ========================
+# Misc
+# ========================
+*.bak
+*.tmp

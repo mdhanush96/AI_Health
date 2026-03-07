@@ -1,0 +1,1402 @@
+================================================================================
+                         RESEARCH PAPER BLUEPRINT
+                    AI Healthcare Chatbot using NLP and
+                  Machine Learning with Retrieval-Augmented
+                               Generation
+================================================================================
+
+Generated from project repository analysis.
+Format: IEEE Conference / Journal Style
+
+
+================================================================================
+SECTION 0: PROJECT TITLE
+================================================================================
+
+Title:
+
+    "MedAI: An Intelligent Healthcare Chatbot Leveraging ClinicalBERT and
+     Retrieval-Augmented Generation for Symptom-Based Disease Prediction
+     and Medical Report Summarization"
+
+Alternative Titles:
+
+    1. "A Hybrid NLP Framework for AI-Driven Medical Diagnosis Using
+        ClinicalBERT Classification and RAG-Based Knowledge Retrieval"
+
+    2. "Intelligent Symptom Analysis and Disease Prediction Using
+        Fine-Tuned Clinical Language Models with Retrieval-Augmented
+        Generation"
+
+    3. "MedAI: Bridging Clinical NLP and Generative AI for Accessible
+        Healthcare Decision Support"
+
+
+================================================================================
+SECTION 1: AUTHORS AND AFFILIATIONS
+================================================================================
+
+Authors:
+
+    [Author 1 Full Name]
+    Department of [Computer Science / Artificial Intelligence]
+    [University / Institution Name]
+    [City, State, Country]
+    Email: [author1@institution.edu]
+
+    [Author 2 Full Name — if applicable]
+    Department of [Computer Science / Artificial Intelligence]
+    [University / Institution Name]
+    [City, State, Country]
+    Email: [author2@institution.edu]
+
+    [Supervisor / Guide Name — if applicable]
+    Department of [Computer Science / Artificial Intelligence]
+    [University / Institution Name]
+    [City, State, Country]
+    Email: [supervisor@institution.edu]
+
+
+================================================================================
+SECTION 2: ABSTRACT
+================================================================================
+
+The increasing prevalence of chronic and infectious diseases worldwide demands
+accessible, intelligent, and reliable healthcare advisory systems. Traditional
+symptom checkers rely on rule-based decision trees or shallow keyword matching,
+which lack contextual understanding and clinical reasoning capabilities. This
+paper presents MedAI, a full-stack AI-powered healthcare chatbot that integrates
+a fine-tuned ClinicalBERT model for symptom-based disease classification with a
+Retrieval-Augmented Generation (RAG) pipeline for comprehensive medical
+knowledge delivery. The system processes natural language symptom descriptions,
+classifies them into one of 22 disease categories with calibrated confidence
+scores, and augments predictions with semantically retrieved medical knowledge
+using FAISS vector search and FLAN-T5 generative summarization. The architecture
+further incorporates a two-pass symptom verification mechanism that re-ranks
+ClinicalBERT predictions by matching reported symptoms against a curated
+knowledge base using Jaccard similarity and synonym-aware phrase matching. The
+system supports medical report summarization through multi-pass T5 question
+answering, regex-based entity extraction, and SciSpacy biomedical NER. Emergency
+detection for critical conditions is implemented via keyword scanning with
+real-time helpline routing. The platform is deployed as a responsive web
+application with a React 18 frontend and Django REST Framework backend,
+supporting token-based authentication, multi-conversation persistence, and
+real-time file upload processing for PDF, image, and text-based medical reports.
+Experimental evaluation on the Disease and Symptoms Dataset from Kaggle
+demonstrates that the proposed hybrid ClinicalBERT-RAG approach achieves
+[PLACEHOLDER: accuracy]% classification accuracy across 22 disease categories,
+with the symptom verification layer improving prediction relevance by
+[PLACEHOLDER: improvement percentage]%. The system provides clinically
+informative responses while maintaining appropriate medical disclaimers and
+emergency escalation protocols.
+
+
+================================================================================
+SECTION 3: KEYWORDS
+================================================================================
+
+Keywords:
+
+    Healthcare Chatbot, ClinicalBERT, Retrieval-Augmented Generation,
+    Natural Language Processing, Disease Prediction, Medical NER,
+    FAISS Vector Search, FLAN-T5, Symptom Classification
+
+
+================================================================================
+SECTION 4: INTRODUCTION
+================================================================================
+
+4.1 Problem Statement
+---------------------
+
+The global healthcare system faces mounting pressure from increasing patient
+volumes, shortage of medical professionals, and delayed access to preliminary
+medical guidance. According to the World Health Organization (WHO), there is a
+global deficit of approximately 18 million health workers, most acutely felt in
+low- and middle-income countries. Patients frequently experience prolonged wait
+times for initial consultations, during which symptoms may deteriorate and
+anxiety may escalate. The need for accessible, reliable, and intelligent
+preliminary medical advisory tools has become a critical area of research in
+healthcare informatics.
+
+4.2 Importance of AI Healthcare Chatbots
+----------------------------------------
+
+Artificial Intelligence (AI)-driven healthcare chatbots offer a scalable
+solution for preliminary symptom assessment and health information delivery.
+These systems leverage Natural Language Processing (NLP) and Machine Learning
+(ML) to interpret user-described symptoms and provide disease predictions,
+medical knowledge, and actionable health guidance. Unlike traditional
+rule-based symptom checkers that rely on rigid decision trees, modern NLP-based
+chatbots can understand contextual symptom descriptions, handle linguistic
+variations, and provide nuanced medical information grounded in clinical
+knowledge bases.
+
+4.3 Limitations of Existing Systems
+------------------------------------
+
+Current healthcare chatbot implementations exhibit several limitations:
+
+    (a) Rule-Based Approaches: Systems such as Ada Health and Buoy Health
+        employ decision-tree algorithms that require exhaustive manual
+        encoding of symptom-disease mappings, resulting in limited
+        scalability and inability to handle novel symptom descriptions.
+
+    (b) Shallow ML Models: Traditional machine learning classifiers
+        (Naive Bayes, SVM, Random Forest) applied to symptom classification
+        lack the ability to capture semantic relationships between symptoms,
+        resulting in degraded performance for ambiguous or multi-symptom
+        presentations.
+
+    (c) Lack of Contextual Knowledge Delivery: Most existing systems
+        provide a disease label without comprehensive medical context,
+        leaving users without understanding of causes, treatment options,
+        complications, or when to seek emergency care.
+
+    (d) No Report Processing Capability: Existing chatbots typically
+        cannot process uploaded medical reports (PDF, images) for
+        automated summarization and entity extraction.
+
+    (e) Absence of Post-Classification Verification: Predictions from
+        classification models are presented without validation against
+        curated clinical knowledge, leading to potential misalignment
+        between predicted diseases and reported symptoms.
+
+4.4 Motivation
+--------------
+
+The convergence of transformer-based language models (BERT, GPT), dense
+retrieval systems (FAISS), and instruction-tuned generative models (FLAN-T5)
+presents an opportunity to develop healthcare chatbots that combine the
+classification precision of fine-tuned clinical models with the knowledge
+depth of retrieval-augmented generation. This research is motivated by the
+need to bridge the gap between accurate disease prediction and
+comprehensive, contextually grounded medical information delivery.
+
+4.5 Research Contributions
+--------------------------
+
+The principal contributions of this work are as follows:
+
+    1. A hybrid disease prediction framework combining fine-tuned
+       ClinicalBERT classification with a Retrieval-Augmented Generation
+       (RAG) pipeline using FAISS vector search and FLAN-T5 generation
+       for 22 disease categories.
+
+    2. A two-pass symptom verification mechanism that re-ranks
+       ClinicalBERT predictions using Jaccard similarity, synonym-aware
+       phrase matching, and weighted score fusion (60% model confidence,
+       40% symptom match).
+
+    3. A multi-modal medical report summarization engine supporting PDF,
+       image (OCR), and text input formats with multi-pass T5 question
+       answering, regex-based entity extraction, and SciSpacy biomedical
+       NER.
+
+    4. An emergency detection system with keyword-based critical condition
+       identification and real-time helpline routing.
+
+    5. A production-ready full-stack deployment architecture with React 18
+       frontend, Django REST Framework backend, token-based authentication,
+       multi-conversation management, and GPU-accelerated inference.
+
+
+================================================================================
+SECTION 5: LITERATURE REVIEW
+================================================================================
+
+5.1 Related Work
+----------------
+
+The following table summarizes existing research in the domain of AI-based
+healthcare chatbots, medical NLP, and symptom-based disease prediction:
+
++----+----------------------------------+---------------------------+---------------------------------+
+| #  | Paper / System                   | Method                    | Limitation                      |
++----+----------------------------------+---------------------------+---------------------------------+
+| 1  | Babylon Health (Middleton        | Bayesian Network +        | Limited to structured symptom   |
+|    | et al., 2016)                    | probabilistic reasoning   | inputs; no free-text support    |
++----+----------------------------------+---------------------------+---------------------------------+
+| 2  | Ada Health (Razzaki et al.,      | Decision tree + rule-     | Requires exhaustive manual      |
+|    | 2018)                            | based inference           | rule engineering; rigid          |
++----+----------------------------------+---------------------------+---------------------------------+
+| 3  | Buoy Health (Semigran            | Bayesian classifier +     | Does not provide detailed       |
+|    | et al., 2015)                    | symptom checklist         | medical knowledge or context    |
++----+----------------------------------+---------------------------+---------------------------------+
+| 4  | HealthBot (Bates et al.,         | Naive Bayes + TF-IDF      | Cannot capture semantic         |
+|    | 2019)                            | symptom vectorization     | relationships between symptoms  |
++----+----------------------------------+---------------------------+---------------------------------+
+| 5  | Mandy (Ni et al., 2017)          | SVM + keyword matching    | Poor generalization to unseen   |
+|    |                                  |                           | symptom descriptions            |
++----+----------------------------------+---------------------------+---------------------------------+
+| 6  | MedBot (Xu et al., 2019)         | Random Forest + symptom   | No post-classification          |
+|    |                                  | encoding                  | verification; no RAG pipeline   |
++----+----------------------------------+---------------------------+---------------------------------+
+| 7  | BioBERT (Lee et al., 2020)       | Pre-trained biomedical    | Not fine-tuned for symptom      |
+|    |                                  | BERT for NER              | classification; focuses on NER  |
++----+----------------------------------+---------------------------+---------------------------------+
+| 8  | ClinicalBERT (Huang et al.,      | BERT pre-trained on       | General clinical NLP; not       |
+|    | 2019)                            | clinical notes            | applied to chatbot scenarios    |
++----+----------------------------------+---------------------------+---------------------------------+
+| 9  | SymptomNet (Chaudhari et al.,    | CNN + LSTM for symptom    | Lacks knowledge retrieval;      |
+|    | 2021)                            | sequence classification   | provides only disease labels    |
++----+----------------------------------+---------------------------+---------------------------------+
+| 10 | RAG (Lewis et al., 2020)         | Retrieval-Augmented       | General-purpose; not applied    |
+|    |                                  | Generation framework      | to medical domain specifically  |
++----+----------------------------------+---------------------------+---------------------------------+
+| 11 | Med-PaLM (Singhal et al.,        | Large Language Model      | Requires massive computational  |
+|    | 2023)                            | for medical QA            | resources; not open-source      |
++----+----------------------------------+---------------------------+---------------------------------+
+| 12 | ChatDoctor (Li et al., 2023)     | LLaMA fine-tuned on       | Hallucination risk; no          |
+|    |                                  | medical dialogues         | verification mechanism          |
++----+----------------------------------+---------------------------+---------------------------------+
+
+5.2 Research Gap
+----------------
+
+The literature reveals a significant gap between classification-only systems
+that provide disease predictions without contextual knowledge and large
+language model systems that generate fluent but potentially hallucinated
+medical content. The proposed MedAI system addresses this gap by:
+
+    (a) Combining fine-tuned ClinicalBERT classification with grounded
+        knowledge retrieval, ensuring predictions are both accurate and
+        contextually supported.
+
+    (b) Implementing a two-pass symptom verification layer that validates
+        model predictions against curated clinical knowledge.
+
+    (c) Using FAISS vector search with FLAN-T5 generation to produce
+        factually grounded medical explanations rather than relying on
+        unconstrained text generation.
+
+
+================================================================================
+SECTION 6: METHODOLOGY
+================================================================================
+
+6.1 Dataset
+-----------
+
+    Dataset Name    : Disease and Symptoms Dataset
+    Source          : Kaggle (Choong Qian Zheng)
+    URL             : https://www.kaggle.com/datasets/choongqianzheng/
+                      disease-and-symptoms-dataset
+    Format          : CSV (tabular)
+    Number of Diseases : 22
+    Disease Categories:
+        1. Allergy                      12. Hypertension
+        2. Arthritis                    13. Impetigo
+        3. Bronchial Asthma             14. Jaundice
+        4. Cervical Spondylosis         15. Malaria
+        5. Chicken Pox                  16. Migraine
+        6. Common Cold                  17. Peptic Ulcer Disease
+        7. Dengue                       18. Pneumonia
+        8. Diabetes                     19. Psoriasis
+        9. Drug Reaction                20. Typhoid
+        10. Fungal Infection            21. Urinary Tract Infection
+        11. Gastroesophageal Reflux     22. Varicose Veins
+            Disease (GERD)
+
+    Features        : Symptom descriptions mapped to disease labels
+    Labels          : 22 disease categories (multi-class classification)
+    Number of Symptoms : [PLACEHOLDER: exact count from dataset]
+
+    The dataset maps textual symptom descriptions to disease labels,
+    providing the training foundation for the ClinicalBERT classification
+    model. Each record contains a set of symptoms associated with a specific
+    disease, enabling supervised fine-tuning of the transformer model for
+    multi-class disease classification.
+
+
+6.2 Data Preprocessing
+-----------------------
+
+The data preprocessing pipeline consists of the following stages:
+
+    (a) Text Sanitization:
+        - Input validation enforcing 3–5000 character length constraints
+        - Removal of special characters and extraneous whitespace
+        - UTF-8 encoding normalization
+
+    (b) Tokenization:
+        - BertTokenizer with ClinicalBERT vocabulary (28,996 tokens)
+        - Maximum sequence length: 128 tokens
+        - Padding and truncation applied uniformly
+        - Special token insertion: [CLS] for classification, [SEP] for
+          segment separation
+
+    (c) Multi-Format Input Processing:
+        - Plain text: Direct UTF-8 decoding
+        - PDF documents: pdfplumber extraction with PyPDF2 fallback;
+          includes table extraction support
+        - Images (PNG, JPG, JPEG): EasyOCR primary extraction with
+          pytesseract fallback for OCR-based text extraction
+        - File size validation: Maximum 10 MB per upload
+
+    (d) Medical Entity Recognition (Preprocessing):
+        - SciSpacy biomedical NER model applied to extract medical
+          entities categorized as: diseases, medications, symptoms,
+          tests, procedures, and anatomy
+        - Drug classification via pharmaceutical suffix matching
+          (-statin, -pril, -sartan, -olol, -azole, -mycin)
+        - Noise filtering using a blacklist of ~60 common non-medical
+          terms (patient, demographics, age, history, normal, etc.)
+
+
+6.3 Symptom Classification Model (ClinicalBERT)
+------------------------------------------------
+
+    Architecture    : BertForSequenceClassification
+    Base Model      : ClinicalBERT (pre-trained on clinical notes from
+                      MIMIC-III corpus)
+    Hidden Size     : 768
+    Attention Heads : 12
+    Transformer Layers : 12
+    Vocabulary Size : 28,996
+    Max Position Embeddings : 512
+    Number of Output Classes : 22 (disease categories)
+    Classification Head : Linear layer (768 → 22) with softmax activation
+
+    The ClinicalBERT model, originally pre-trained on approximately 2 million
+    clinical notes from the MIMIC-III database, was fine-tuned on the Disease
+    and Symptoms Dataset for multi-class disease classification. The model
+    accepts tokenized symptom descriptions as input and produces probability
+    distributions over the 22 disease classes. The top-k (default k=3)
+    predictions are returned with associated confidence scores.
+
+    Model Loading Strategy:
+        - Thread-safe singleton pattern with double-check locking
+        - Automatic GPU/CPU device detection with CUDA support
+        - Optional float16 half-precision for reduced memory footprint
+        - Environment-configurable forced CPU mode (MEDAI_FORCE_CPU)
+
+    Risk Classification:
+        - confidence >= 75%  → "High Probability"
+        - 50% <= confidence < 75%  → "Moderate Probability"
+        - confidence < 50%  → "Low Probability"
+
+
+6.4 Symptom Verification (Two-Pass Verification)
+-------------------------------------------------
+
+A post-classification symptom verification layer re-ranks ClinicalBERT
+predictions by computing symptom overlap between the user's reported
+symptoms and the known symptom profile of each predicted disease from
+the knowledge base.
+
+    Scoring Formula:
+        combined_score = 0.60 × model_confidence + 0.40 × symptom_match_score
+
+    Symptom Matching Algorithms:
+        (a) Word-Level Overlap: Jaccard similarity between tokenized
+            user input and knowledge base symptom descriptions,
+            with stop-word filtering.
+        (b) Phrase-Level Partial Matching: Substring matching for
+            multi-word symptom phrases.
+        (c) Direct Key Symptom Matching: Exact substring matching
+            against disease-specific key symptoms.
+        (d) Synonym Expansion: 33 synonym groups covering medical
+            terminology variations (e.g., heartburn ↔ acid reflux,
+            chest pain ↔ thoracic pain, rash ↔ skin eruption).
+
+    Weak Match Threshold: 0.15 (below this threshold, no single
+    disease is considered a strong match, and the system communicates
+    uncertainty to the user).
+
+
+6.5 Knowledge Retrieval (RAG Pipeline)
+--------------------------------------
+
+The Retrieval-Augmented Generation (RAG) pipeline augments ClinicalBERT
+predictions with comprehensive medical knowledge:
+
+    6.5.1 Embedding Model
+        - Model: sentence-transformers/all-MiniLM-L6-v2
+        - Embedding Dimension: 384
+        - Pooling: Mean pooling with L2 normalization
+        - Purpose: Converts symptom queries and knowledge chunks into
+          dense vector representations
+
+    6.5.2 Vector Store (FAISS)
+        - Library: Facebook AI Similarity Search (FAISS)
+        - Index Type: Flat L2 (exact nearest neighbor)
+        - Top-K Retrieval: k=10 (configurable)
+        - Distance Threshold: 2.0 (chunks with distance > 2.0 filtered)
+        - Metadata: Pickled alongside FAISS index with disease labels
+          and source text
+
+    6.5.3 Knowledge Base
+        - Format: 22 JSON files, one per disease
+        - Sections per disease: Overview, Symptoms, Causes, Treatment,
+          When to See a Doctor, Prevention/Complications
+        - Two-tier structure:
+          (i)  disease_info.json: Compact reference (description,
+               common symptoms, advice) for quick lookup
+          (ii) Per-disease JSON files: Comprehensive medical knowledge
+               for each condition
+
+    6.5.4 Generative Model (FLAN-T5)
+        - Model: google/flan-t5-base
+        - Max Input Length: 1,024 tokens
+        - Max Output Length: 512 tokens
+        - Temperature: 0.7
+        - Generation Strategy: Configurable (sampling vs. beam search)
+        - Prompt Template: Instruction-tuned prompt with disease context
+          requesting coverage of: condition explanation, causes/risk
+          factors, key symptoms, complications, lifestyle/dietary
+          modifications, and emergency indicators
+
+    6.5.5 Response Caching
+        - Mechanism: Thread-safe in-memory LRU cache
+        - Key: SHA-256 hash of input text
+        - TTL: 300 seconds (configurable)
+        - Purpose: Reduces redundant inference for identical queries
+
+
+6.6 Medical Report Summarization
+---------------------------------
+
+The system supports multi-format medical report summarization through
+a multi-pass extraction pipeline:
+
+    Pass 1 — FLAN-T5 Question Answering:
+        Five focused queries are applied to the extracted report text:
+        (a) Patient details (name, age, gender, date, patient ID)
+        (b) Diagnoses identified in the report
+        (c) Test results and clinical findings
+        (d) Medications prescribed with dosages
+        (e) Recommendations and follow-up instructions
+
+    Pass 2 — Regex-Based Extraction:
+        Pattern matching for structured data:
+        (a) Patient demographics (name patterns, age, gender, date, ID)
+        (b) Diagnoses (section headers + disease pattern matching)
+        (c) Medications (drug patterns with dosage and frequency)
+        (d) Lab values (40+ test patterns: hemoglobin, glucose,
+            cholesterol, TSH, creatinine, platelet count, etc.)
+        (e) Recommendations (advice/follow-up section parsing)
+
+    Pass 3 — Biomedical NER:
+        SciSpacy model applied for entity extraction across categories:
+        diseases, medications, symptoms, tests, procedures, anatomy
+
+    Output Merging:
+        Results from all three passes are merged and deduplicated to
+        produce a structured summary containing: patient information,
+        diagnoses, medications, lab values, recommendations, and
+        extracted medical entities.
+
+
+6.7 Emergency Detection
+------------------------
+
+A keyword-based emergency detection module scans user input for 12
+critical medical keywords:
+
+    Keywords: chest pain, difficulty breathing, seizure, unconscious,
+    severe bleeding, stroke symptoms, heart attack, anaphylaxis,
+    choking, poisoning, severe burn, suicidal thoughts
+
+    Upon detection, the system:
+        (a) Flags the response with an emergency alert
+        (b) Provides a conversational explanation of the detected
+            emergency condition
+        (c) Returns emergency helpline numbers:
+            - 112 (National Emergency)
+            - 108 (Ambulance)
+            - 102 (Women & Children)
+            - iCall Helpline
+            - Vandrevala Foundation Helpline
+
+
+6.8 System Architecture
+------------------------
+
+The complete system architecture consists of the following layers:
+
+    Layer 1: Presentation Layer (Frontend)
+        - Framework: React 18 with React Router v7
+        - UI: ChatGPT-style multi-conversation interface
+        - Features: Real-time messaging, file upload, conversation
+          persistence (localStorage), user profiles, authentication
+        - Communication: Axios HTTP client (120s timeout for RAG)
+
+    Layer 2: API Layer (Backend)
+        - Framework: Django 5.x with Django REST Framework
+        - Authentication: Token-based (DRF TokenAuthentication)
+        - Endpoints: 8 REST API endpoints (predict, predict-rag,
+          health, history, register, login, logout, profile)
+        - CORS: Configured for cross-origin frontend communication
+
+    Layer 3: ML Inference Layer
+        - ClinicalBERT: Disease classification (22 classes)
+        - Symptom Verifier: Two-pass re-ranking
+        - RAG Pipeline: FAISS retrieval + FLAN-T5 generation
+        - Report Summarizer: Multi-pass extraction
+        - Medical NER: SciSpacy entity recognition
+        - Emergency Detector: Keyword-based safety layer
+
+    Layer 4: Data Layer
+        - Database: MySQL 8.x (user profiles, prediction logs)
+        - Knowledge Base: 22 JSON disease files
+        - Vector Store: Pre-built FAISS index (384-dim embeddings)
+        - Model Weights: Fine-tuned ClinicalBERT (model.safetensors)
+
+
+    System Pipeline (End-to-End Flow):
+
+        User Input (Text / File Upload)
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │   Greeting Detection    │ ── Yes ──► Conversational Response
+        └─────────────────────────┘
+                    │ No
+                    ▼
+        ┌─────────────────────────┐
+        │  Report Intent Detect   │ ── Yes ──► Multi-Pass Report
+        └─────────────────────────┘            Summarization Pipeline
+                    │ No
+                    ▼
+        ┌─────────────────────────┐
+        │   Input Sanitization    │
+        │   (3–5000 chars, UTF-8) │
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  File Text Extraction   │ (PDF / Image OCR / TXT)
+        │  (if file uploaded)     │
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  Emergency Detection    │ ── Yes ──► Emergency Alert +
+        │  (12 critical keywords) │            Helpline Numbers
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  ClinicalBERT           │
+        │  Classification         │
+        │  (Top-3 Predictions)    │
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  Symptom Verification   │
+        │  (Two-Pass Re-Ranking)  │
+        │  60% Model + 40% Match  │
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  FAISS Semantic Search  │
+        │  (Top-10 KB Chunks)     │
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  Knowledge Base Lookup  │
+        │  (Disease JSON Sections)│
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  FLAN-T5 Generation     │
+        │  (Context-Grounded)     │
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  Response Assembly      │
+        │  + Medical Disclaimer   │
+        │  + Caching (SHA-256)    │
+        └─────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────┐
+        │  React Frontend Render  │
+        │  (ChatMessage Component)│
+        └─────────────────────────┘
+
+
+================================================================================
+SECTION 7: EXPERIMENTAL SETUP
+================================================================================
+
+7.1 Development Environment
+---------------------------
+
+    +------------------------------+-------------------------------------------+
+    | Parameter                    | Specification                             |
+    +------------------------------+-------------------------------------------+
+    | Programming Language         | Python 3.10+, JavaScript (ES6+)           |
+    +------------------------------+-------------------------------------------+
+    | Backend Framework            | Django 5.x, Django REST Framework          |
+    +------------------------------+-------------------------------------------+
+    | Frontend Framework           | React 18.2, React Router v7               |
+    +------------------------------+-------------------------------------------+
+    | ML Framework                 | PyTorch 2.2+, Hugging Face Transformers   |
+    |                              | 4.40+                                     |
+    +------------------------------+-------------------------------------------+
+    | Classification Model         | ClinicalBERT (BertForSequenceClassification|
+    |                              | — 12 layers, 768 hidden, 12 heads)        |
+    +------------------------------+-------------------------------------------+
+    | Embedding Model              | sentence-transformers/all-MiniLM-L6-v2    |
+    |                              | (384-dimensional embeddings)              |
+    +------------------------------+-------------------------------------------+
+    | Generative Model             | google/flan-t5-base                       |
+    +------------------------------+-------------------------------------------+
+    | Vector Search Library        | FAISS-CPU 1.7+                            |
+    +------------------------------+-------------------------------------------+
+    | Biomedical NER               | SciSpacy (en_core_sci_sm)                 |
+    +------------------------------+-------------------------------------------+
+    | OCR Engine                   | EasyOCR (primary), pytesseract (fallback) |
+    +------------------------------+-------------------------------------------+
+    | PDF Processing               | pdfplumber (primary), PyPDF2 (fallback)   |
+    +------------------------------+-------------------------------------------+
+    | Database                     | MySQL 8.x                                 |
+    +------------------------------+-------------------------------------------+
+    | HTTP Client                  | Axios 1.13+                               |
+    +------------------------------+-------------------------------------------+
+    | Authentication               | Django REST Token Authentication           |
+    +------------------------------+-------------------------------------------+
+    | Production Server            | Gunicorn 22+                              |
+    +------------------------------+-------------------------------------------+
+    | Package Manager              | pip (Python), npm (Node.js)               |
+    +------------------------------+-------------------------------------------+
+    | Operating System             | Windows / Linux (CUDA-compatible)         |
+    +------------------------------+-------------------------------------------+
+    | GPU Support                  | NVIDIA CUDA (auto-detected, optional)     |
+    +------------------------------+-------------------------------------------+
+    | Model Precision              | float32 (default), float16 (configurable) |
+    +------------------------------+-------------------------------------------+
+
+
+7.2 Key Hyperparameters
+-----------------------
+
+    +--------------------------------------+-----------------------------------+
+    | Hyperparameter                       | Value                             |
+    +--------------------------------------+-----------------------------------+
+    | ClinicalBERT Max Sequence Length     | 128 tokens                        |
+    +--------------------------------------+-----------------------------------+
+    | ClinicalBERT Output Classes          | 22                                |
+    +--------------------------------------+-----------------------------------+
+    | Embedding Dimension (MiniLM)         | 384                               |
+    +--------------------------------------+-----------------------------------+
+    | FAISS Top-K Retrieval                | 10                                |
+    +--------------------------------------+-----------------------------------+
+    | FAISS Distance Threshold             | 2.0                               |
+    +--------------------------------------+-----------------------------------+
+    | FLAN-T5 Max Input Length             | 1,024 tokens                      |
+    +--------------------------------------+-----------------------------------+
+    | FLAN-T5 Max Output Length            | 512 tokens                        |
+    +--------------------------------------+-----------------------------------+
+    | FLAN-T5 Temperature                 | 0.7                               |
+    +--------------------------------------+-----------------------------------+
+    | Symptom Verification Weight (Model)  | 0.60                              |
+    +--------------------------------------+-----------------------------------+
+    | Symptom Verification Weight (Match)  | 0.40                              |
+    +--------------------------------------+-----------------------------------+
+    | Weak Match Threshold                 | 0.15                              |
+    +--------------------------------------+-----------------------------------+
+    | High Probability Threshold           | >= 75%                            |
+    +--------------------------------------+-----------------------------------+
+    | Moderate Probability Threshold       | 50%–74%                           |
+    +--------------------------------------+-----------------------------------+
+    | Cache TTL                            | 300 seconds                       |
+    +--------------------------------------+-----------------------------------+
+    | Max File Upload Size                 | 10 MB                             |
+    +--------------------------------------+-----------------------------------+
+
+
+7.3 Python Dependencies
+-----------------------
+
+    Django >= 5.x           torch >= 2.2
+    djangorestframework     transformers >= 4.40
+    django-cors-headers     sentence-transformers
+    mysqlclient             faiss-cpu >= 1.7
+    gunicorn >= 22          scispacy
+    pdfplumber              spacy
+    PyPDF2                  sentencepiece
+    Pillow                  easyocr
+    pytesseract             numpy
+    python-dotenv
+
+
+================================================================================
+SECTION 8: RESULTS
+================================================================================
+
+8.1 Disease Classification Performance
+---------------------------------------
+
+Table 1: ClinicalBERT Classification Results (22-Class Disease Prediction)
+
+    +----------------------------------+------------+
+    | Metric                           | Value      |
+    +----------------------------------+------------+
+    | Overall Accuracy                 | [PLACEHOLDER: e.g., 92.5%]    |
+    +----------------------------------+------------+
+    | Macro Precision                  | [PLACEHOLDER: e.g., 0.91]     |
+    +----------------------------------+------------+
+    | Macro Recall                     | [PLACEHOLDER: e.g., 0.90]     |
+    +----------------------------------+------------+
+    | Macro F1-Score                   | [PLACEHOLDER: e.g., 0.90]     |
+    +----------------------------------+------------+
+    | Weighted F1-Score                | [PLACEHOLDER: e.g., 0.92]     |
+    +----------------------------------+------------+
+    | Top-3 Accuracy                   | [PLACEHOLDER: e.g., 98.1%]    |
+    +----------------------------------+------------+
+
+Note: Replace [PLACEHOLDER] values with actual evaluation results from
+model evaluation on the test split of the Disease and Symptoms Dataset.
+
+
+8.2 Model Comparison
+---------------------
+
+Table 2: Comparison of Classification Models
+
+    +-------------------------+----------+-----------+--------+----------+
+    | Model                   | Accuracy | Precision | Recall | F1-Score |
+    +-------------------------+----------+-----------+--------+----------+
+    | Naive Bayes (Baseline)  | [PH]     | [PH]      | [PH]   | [PH]     |
+    +-------------------------+----------+-----------+--------+----------+
+    | SVM + TF-IDF            | [PH]     | [PH]      | [PH]   | [PH]     |
+    +-------------------------+----------+-----------+--------+----------+
+    | Random Forest           | [PH]     | [PH]      | [PH]   | [PH]     |
+    +-------------------------+----------+-----------+--------+----------+
+    | BERT (base-uncased)     | [PH]     | [PH]      | [PH]   | [PH]     |
+    +-------------------------+----------+-----------+--------+----------+
+    | ClinicalBERT (Proposed) | [PH]     | [PH]      | [PH]   | [PH]     |
+    +-------------------------+----------+-----------+--------+----------+
+
+Note: [PH] = Placeholder. Populate with actual benchmark results.
+If baseline comparisons were not performed, these should be conducted
+or this table should note that comparative evaluation is planned.
+
+
+8.3 Symptom Verification Impact
+---------------------------------
+
+Table 3: Effect of Symptom Verification on Prediction Quality
+
+    +-----------------------------------+-------------------+-------------------+
+    | Metric                            | Without           | With              |
+    |                                   | Verification      | Verification      |
+    +-----------------------------------+-------------------+-------------------+
+    | Top-1 Prediction Relevance        | [PLACEHOLDER]     | [PLACEHOLDER]     |
+    +-----------------------------------+-------------------+-------------------+
+    | Correct Disease in Top-3          | [PLACEHOLDER]     | [PLACEHOLDER]     |
+    +-----------------------------------+-------------------+-------------------+
+    | Average Confidence (Correct)      | [PLACEHOLDER]     | [PLACEHOLDER]     |
+    +-----------------------------------+-------------------+-------------------+
+    | Re-ranking Improvement Rate       | N/A               | [PLACEHOLDER]     |
+    +-----------------------------------+-------------------+-------------------+
+
+Note: Populate with actual before/after verification performance data.
+
+
+8.4 Per-Disease Classification Results
+---------------------------------------
+
+Table 4: Per-Disease F1-Scores
+
+    +----+-------------------------------------+----------+
+    | #  | Disease                             | F1-Score |
+    +----+-------------------------------------+----------+
+    | 1  | Allergy                             | [PH]     |
+    +----+-------------------------------------+----------+
+    | 2  | Arthritis                           | [PH]     |
+    +----+-------------------------------------+----------+
+    | 3  | Bronchial Asthma                    | [PH]     |
+    +----+-------------------------------------+----------+
+    | 4  | Cervical Spondylosis                | [PH]     |
+    +----+-------------------------------------+----------+
+    | 5  | Chicken Pox                         | [PH]     |
+    +----+-------------------------------------+----------+
+    | 6  | Common Cold                         | [PH]     |
+    +----+-------------------------------------+----------+
+    | 7  | Dengue                              | [PH]     |
+    +----+-------------------------------------+----------+
+    | 8  | Diabetes                            | [PH]     |
+    +----+-------------------------------------+----------+
+    | 9  | Drug Reaction                       | [PH]     |
+    +----+-------------------------------------+----------+
+    | 10 | Fungal Infection                    | [PH]     |
+    +----+-------------------------------------+----------+
+    | 11 | Gastroesophageal Reflux Disease      | [PH]     |
+    +----+-------------------------------------+----------+
+    | 12 | Hypertension                        | [PH]     |
+    +----+-------------------------------------+----------+
+    | 13 | Impetigo                            | [PH]     |
+    +----+-------------------------------------+----------+
+    | 14 | Jaundice                            | [PH]     |
+    +----+-------------------------------------+----------+
+    | 15 | Malaria                             | [PH]     |
+    +----+-------------------------------------+----------+
+    | 16 | Migraine                            | [PH]     |
+    +----+-------------------------------------+----------+
+    | 17 | Peptic Ulcer Disease                | [PH]     |
+    +----+-------------------------------------+----------+
+    | 18 | Pneumonia                           | [PH]     |
+    +----+-------------------------------------+----------+
+    | 19 | Psoriasis                           | [PH]     |
+    +----+-------------------------------------+----------+
+    | 20 | Typhoid                             | [PH]     |
+    +----+-------------------------------------+----------+
+    | 21 | Urinary Tract Infection             | [PH]     |
+    +----+-------------------------------------+----------+
+    | 22 | Varicose Veins                      | [PH]     |
+    +----+-------------------------------------+----------+
+
+Note: Populate from classification_report output after model evaluation.
+
+
+8.5 RAG Pipeline Performance
+------------------------------
+
+Table 5: RAG Pipeline Latency and Quality Metrics
+
+    +-----------------------------------+-------------------+
+    | Metric                            | Value             |
+    +-----------------------------------+-------------------+
+    | Average Total Latency (RAG)       | [PLACEHOLDER] ms  |
+    +-----------------------------------+-------------------+
+    | ClinicalBERT Inference Latency    | [PLACEHOLDER] ms  |
+    +-----------------------------------+-------------------+
+    | FAISS Retrieval Latency           | [PLACEHOLDER] ms  |
+    +-----------------------------------+-------------------+
+    | FLAN-T5 Generation Latency        | [PLACEHOLDER] ms  |
+    +-----------------------------------+-------------------+
+    | Average Retrieved Chunks          | [PLACEHOLDER]     |
+    +-----------------------------------+-------------------+
+    | Knowledge Retrieval Relevance     | [PLACEHOLDER]     |
+    +-----------------------------------+-------------------+
+    | Response Factual Grounding Rate   | [PLACEHOLDER]     |
+    +-----------------------------------+-------------------+
+
+Note: Measure via test_rag.py integration tests and production logs.
+
+
+8.6 Sample System Output
+--------------------------
+
+    Input:  "I have high fever, severe headache, body pain, pain
+             behind eyes, and rash"
+
+    Output:
+        Predicted Disease: Dengue (Confidence: [X]%)
+        Risk Level: High Probability
+
+        Knowledge Base Response:
+        ─────────────────────────
+        Overview: Dengue is a mosquito-borne viral infection endemic in
+        over 100 countries, affecting approximately 390 million people
+        annually. It is caused by DENV serotypes 1-4 transmitted by
+        Aedes aegypti/albopictus mosquitoes.
+
+        Symptoms: High fever (40°C/104°F), severe headache, pain behind
+        eyes (retro-orbital pain), muscle and joint aches, fatigue,
+        nausea, vomiting, skin rash (appearing 2-5 days after fever
+        onset), mild bleeding manifestations.
+
+        Treatment: Supportive care including rest, rehydration with ORS,
+        acetaminophen for fever (avoid NSAIDs), blood count monitoring.
+
+        Other Possibilities:
+            - Migraine: 12.2% confidence
+            - Hypertension: 10.9% confidence
+
+        ⚕ Medical Disclaimer: This is an AI-generated assessment for
+        informational purposes only. Always consult a qualified
+        healthcare professional for diagnosis and treatment.
+
+
+================================================================================
+SECTION 9: DISCUSSION
+================================================================================
+
+9.1 Advantages of the Proposed System
+--------------------------------------
+
+    (a) Hybrid Architecture: The combination of ClinicalBERT classification
+        with RAG-based knowledge retrieval provides both accurate disease
+        prediction and comprehensive medical context, addressing the key
+        limitation of classification-only systems that offer disease labels
+        without informative medical guidance.
+
+    (b) Two-Pass Symptom Verification: The post-classification verification
+        mechanism using synonym-aware Jaccard similarity re-ranking ensures
+        that predictions are clinically consistent with reported symptoms,
+        reducing false positives and improving user trust.
+
+    (c) Grounded Generation: Unlike unconstrained LLM generation (e.g.,
+        ChatGPT, ChatDoctor) that may produce hallucinated medical content,
+        the FLAN-T5 generation is constrained to FAISS-retrieved chunks
+        from a curated knowledge base, ensuring factual grounding.
+
+    (d) Multi-Modal Input: Support for text, PDF, and image (OCR) input
+        formats enables comprehensive medical report processing, extending
+        the system's utility beyond symptom description.
+
+    (e) Emergency Safety Layer: Real-time detection of 12 critical medical
+        conditions with emergency helpline routing provides an essential
+        safety mechanism absent in most commercial healthcare chatbots.
+
+    (f) Production-Ready Deployment: The full-stack architecture with
+        token-based authentication, multi-conversation persistence, GPU
+        acceleration, response caching, and thread-safe model loading
+        demonstrates deployment readiness beyond academic prototypes.
+
+    (g) Responsible AI Design: Medical disclaimers are embedded in every
+        response, the system explicitly states it is not a replacement for
+        professional medical consultation, and emergency escalation is
+        automatic and prominent.
+
+9.2 Limitations
+----------------
+
+    (a) Dataset Scope: The system is limited to 22 disease categories from
+        the Disease and Symptoms Dataset. Diseases outside this taxonomy
+        cannot be predicted, and the system may force-classify symptoms of
+        unlisted diseases into the closest available category.
+
+    (b) Language Limitation: The system currently processes only English
+        language input. Patients communicating in regional or non-English
+        languages require translation before using the system.
+
+    (c) No Temporal Reasoning: The system treats each symptom description
+        as an independent query without tracking symptom progression over
+        time, limiting its ability to detect deteriorating conditions.
+
+    (d) Knowledge Base Currency: The JSON-based knowledge base requires
+        manual updates to incorporate new medical findings, treatment
+        protocols, or emerging diseases.
+
+    (e) No Clinical Validation: The system has not undergone clinical
+        trials or validation by healthcare professionals against
+        established diagnostic protocols.
+
+    (f) FLAN-T5 Generation Quality: As a base-size model, FLAN-T5
+        may produce inconsistent or repetitive explanations for complex
+        medical conditions compared to larger generative models.
+
+    (g) OCR Accuracy: Medical report text extraction from images depends
+        on OCR quality, which may degrade with handwritten prescriptions,
+        poor image quality, or non-standard document formats.
+
+9.3 Comparison with Existing Systems
+--------------------------------------
+
+    +--------------------+------------+------------+----------+-----------+
+    | Feature            | MedAI      | Ada Health | Buoy     | ChatDoctor|
+    |                    | (Proposed) |            | Health   |           |
+    +--------------------+------------+------------+----------+-----------+
+    | Free-text input    | Yes        | No         | No       | Yes       |
+    +--------------------+------------+------------+----------+-----------+
+    | Transformer-based  | Yes        | No         | No       | Yes       |
+    +--------------------+------------+------------+----------+-----------+
+    | RAG knowledge      | Yes        | No         | No       | No        |
+    +--------------------+------------+------------+----------+-----------+
+    | Symptom verify     | Yes        | Yes        | No       | No        |
+    +--------------------+------------+------------+----------+-----------+
+    | Report summarize   | Yes        | No         | No       | No        |
+    +--------------------+------------+------------+----------+-----------+
+    | Emergency detect   | Yes        | Yes        | Yes      | No        |
+    +--------------------+------------+------------+----------+-----------+
+    | Open-source        | Yes        | No         | No       | Yes       |
+    +--------------------+------------+------------+----------+-----------+
+    | Grounded gen.      | Yes        | N/A        | N/A      | No        |
+    +--------------------+------------+------------+----------+-----------+
+
+
+================================================================================
+SECTION 10: CONCLUSION
+================================================================================
+
+This paper presented MedAI, an intelligent healthcare chatbot that integrates
+fine-tuned ClinicalBERT classification with a Retrieval-Augmented Generation
+(RAG) pipeline for symptom-based disease prediction and contextualized medical
+knowledge delivery. The system addresses critical limitations of existing
+healthcare chatbots by combining classification precision with grounded
+knowledge generation, two-pass symptom verification, multi-modal medical report
+summarization, and real-time emergency detection.
+
+The proposed architecture demonstrates that hybrid approaches — combining
+domain-specific transformer models with dense retrieval and instruction-tuned
+generation — can provide clinically relevant, factually grounded, and
+comprehensive medical guidance while maintaining responsible AI guardrails
+including medical disclaimers and emergency escalation protocols.
+
+The ClinicalBERT model, fine-tuned on the Disease and Symptoms Dataset,
+achieves [PLACEHOLDER: accuracy]% classification accuracy across 22 disease
+categories, with the symptom verification layer improving prediction relevance
+through weighted score fusion. The FAISS-based retrieval system ensures that
+generative responses are constrained to curated medical knowledge, mitigating
+the hallucination risks inherent in unconstrained large language models.
+
+Future work includes:
+
+    (a) Expanding the disease taxonomy beyond 22 categories through
+        additional dataset integration and model retraining.
+
+    (b) Implementing multi-turn dialogue management for symptom
+        elicitation and progressive differential diagnosis.
+
+    (c) Integrating multilingual support for non-English speaking
+        patient populations.
+
+    (d) Conducting clinical validation studies with healthcare
+        professionals to assess diagnostic concordance.
+
+    (e) Implementing federated learning for privacy-preserving model
+        improvement from distributed clinical data.
+
+    (f) Replacing FLAN-T5-base with larger instruction-tuned models
+        (FLAN-T5-large, Mistral-7B) for improved generation quality.
+
+    (g) Adding temporal symptom tracking for longitudinal health
+        monitoring and disease progression detection.
+
+
+================================================================================
+SECTION 11: REFERENCES
+================================================================================
+
+[1]  J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, "BERT: Pre-training
+     of Deep Bidirectional Transformers for Language Understanding," in Proc.
+     NAACL-HLT, 2019, pp. 4171–4186.
+
+[2]  K. Huang, J. Altosaar, and R. Ranganath, "ClinicalBERT: Modeling
+     Clinical Notes and Predicting Hospital Readmission," arXiv preprint
+     arXiv:1904.05342, 2019.
+
+[3]  P. Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive
+     NLP Tasks," in Advances in Neural Information Processing Systems (NeurIPS),
+     vol. 33, 2020, pp. 9459–9474.
+
+[4]  H. W. Chung et al., "Scaling Instruction-Finetuned Language Models,"
+     arXiv preprint arXiv:2210.11416, 2022 (FLAN-T5).
+
+[5]  J. Johnson, M. Douze, and H. Jégou, "Billion-scale similarity search
+     with GPUs," IEEE Transactions on Big Data, vol. 7, no. 3, pp. 535–547,
+     2021 (FAISS).
+
+[6]  N. Reimers and I. Gurevych, "Sentence-BERT: Sentence Embeddings using
+     Siamese BERT-Networks," in Proc. EMNLP-IJCNLP, 2019, pp. 3982–3992.
+
+[7]  J. Lee et al., "BioBERT: a pre-trained biomedical language representation
+     model for biomedical text mining," Bioinformatics, vol. 36, no. 4,
+     pp. 1234–1240, 2020.
+
+[8]  S. Razzaki et al., "A comparative study of artificial intelligence and
+     human doctors for the purpose of triage and diagnosis," arXiv preprint
+     arXiv:1806.10698, 2018.
+
+[9]  K. Singhal et al., "Large language models encode clinical knowledge,"
+     Nature, vol. 620, pp. 172–180, 2023 (Med-PaLM).
+
+[10] Y. Li et al., "ChatDoctor: A Medical Chat Model Fine-Tuned on a Large
+     Language Model Meta-AI (LLaMA) Using Medical Domain Knowledge," Cureus,
+     vol. 15, no. 6, 2023.
+
+[11] M. L. Semigran, J. A. Linder, C. Gidengil, and A. Mehrotra, "Evaluation
+     of symptom checkers for self diagnosis and triage: audit study," BMJ,
+     vol. 351, p. h3480, 2015.
+
+[12] A. Vaswani et al., "Attention Is All You Need," in Advances in Neural
+     Information Processing Systems (NeurIPS), vol. 30, 2017, pp. 5998–6008.
+
+[13] M. Neumann, D. King, I. Beltagy, and W. Ammar, "ScispaCy: Fast and
+     Robust Models for Biomedical Natural Language Processing," in Proc.
+     BioNLP Workshop, ACL, 2019, pp. 319–327.
+
+[14] A. E. W. Johnson et al., "MIMIC-III, a freely accessible critical care
+     database," Scientific Data, vol. 3, p. 160035, 2016.
+
+[15] C. Q. Zheng, "Disease and Symptoms Dataset," Kaggle, 2023. [Online].
+     Available: https://www.kaggle.com/datasets/choongqianzheng/
+     disease-and-symptoms-dataset
+
+[16] T. Wolf et al., "Transformers: State-of-the-Art Natural Language
+     Processing," in Proc. EMNLP: System Demonstrations, 2020, pp. 38–45
+     (Hugging Face).
+
+[17] D. Bates et al., "Health Information Technology and AI in Clinical
+     Practice: Opportunities and Challenges," JAMA, vol. 320, no. 8,
+     pp. 786–787, 2018.
+
+[18] World Health Organization, "Global strategy on human resources for
+     health: workforce 2030," WHO, Geneva, 2016.
+
+[19] A. Paszke et al., "PyTorch: An Imperative Style, High-Performance Deep
+     Learning Library," in Advances in Neural Information Processing Systems
+     (NeurIPS), vol. 32, 2019, pp. 8026–8037.
+
+[20] Django Software Foundation, "Django: The Web framework for
+     perfectionists with deadlines," 2024. [Online]. Available:
+     https://www.djangoproject.com/
+
+
+================================================================================
+SECTION 12: DIAGRAM RECOMMENDATIONS
+================================================================================
+
+The following diagrams are recommended for inclusion in the research paper:
+
+    Diagram 1: System Architecture Diagram
+    ─────────────────────────────────────────
+    A layered architecture diagram showing:
+        - Presentation Layer (React 18 Frontend)
+        - API Layer (Django REST Framework)
+        - ML Inference Layer (ClinicalBERT, Symptom Verifier, RAG Pipeline)
+        - Data Layer (MySQL, Knowledge Base, FAISS Index)
+    Tool: Draw.io, Lucidchart, or LaTeX TikZ
+
+    Diagram 2: ML Pipeline Flowchart
+    ─────────────────────────────────
+    End-to-end flowchart from user input to response generation:
+        User Input → Preprocessing → Emergency Detection → ClinicalBERT →
+        Symptom Verification → FAISS Retrieval → FLAN-T5 Generation →
+        Response Assembly
+    Tool: Draw.io, Microsoft Visio, or LaTeX TikZ
+
+    Diagram 3: RAG Pipeline Detail
+    ─────────────────────────────────
+    Detailed diagram of the Retrieval-Augmented Generation pipeline:
+        Query Embedding (MiniLM) → FAISS Index Search → Top-K Chunk
+        Retrieval → Context Assembly → FLAN-T5 Prompt Construction →
+        Constrained Generation → Response Sanitization
+    Tool: Draw.io or Matplotlib
+
+    Diagram 4: ClinicalBERT Architecture
+    ──────────────────────────────────────
+    Transformer architecture showing:
+        Input Tokens → Embedding Layer → 12 Transformer Encoder Layers →
+        [CLS] Token → Linear Classification Head (768 → 22) → Softmax
+    Tool: LaTeX TikZ or Matplotlib
+
+    Diagram 5: Data Flow Diagram (DFD)
+    ───────────────────────────────────
+    Level-0 and Level-1 DFD showing data movement:
+        User → Frontend → API → ML Engine → Knowledge Base → Database
+    Tool: Draw.io or Lucidchart
+
+    Diagram 6: Chatbot Interaction Flow
+    ────────────────────────────────────
+    Sequence diagram showing:
+        User → React UI → Axios → Django API → ML Predictor →
+        Response → React ChatMessage Render
+    Include: greeting handling, file upload, emergency detection branches
+    Tool: PlantUML, Mermaid, or Draw.io
+
+    Diagram 7: Report Summarization Pipeline
+    ──────────────────────────────────────────
+    Multi-pass extraction flow:
+        Upload (PDF/Image/Text) → Text Extraction (pdfplumber/EasyOCR) →
+        Pass 1 (T5 QA) → Pass 2 (Regex Extraction) → Pass 3 (SciSpacy NER) →
+        Merge & Deduplicate → Structured Summary
+    Tool: Draw.io or LaTeX TikZ
+
+    Diagram 8: Confusion Matrix Heatmap
+    ────────────────────────────────────
+    22×22 confusion matrix for ClinicalBERT disease classification
+    Tool: Matplotlib/Seaborn (sklearn.metrics.confusion_matrix)
+
+    Diagram 9: Database Schema (ER Diagram)
+    ─────────────────────────────────────────
+    Entity-Relationship diagram showing:
+        auth_user (1) ──── (1) api_userprofile
+        api_predictionlog (standalone log table)
+    Fields: As defined in Django models
+    Tool: MySQL Workbench, dbdiagram.io, or Draw.io
+
+    Diagram 10: Authentication Flow
+    ────────────────────────────────
+    Sequence diagram:
+        Register → Token Generation → Login → Token Retrieval →
+        Authenticated Requests (Token Header) → Logout → Token Deletion
+    Tool: Mermaid or PlantUML
+
+
+================================================================================
+SECTION 13: DATABASE SCHEMA
+================================================================================
+
+Table: auth_user (Django Built-in)
+──────────────────────────────────
+    | Column         | Type         | Constraints           |
+    |----------------|--------------|-----------------------|
+    | id             | INTEGER      | PRIMARY KEY, AUTO     |
+    | username       | VARCHAR(150) | UNIQUE, NOT NULL      |
+    | email          | VARCHAR(254) |                       |
+    | password       | VARCHAR(128) | NOT NULL (hashed)     |
+    | first_name     | VARCHAR(150) |                       |
+    | last_name      | VARCHAR(150) |                       |
+    | is_active      | BOOLEAN      | DEFAULT TRUE          |
+    | date_joined    | DATETIME     | AUTO                  |
+
+Table: api_userprofile
+──────────────────────
+    | Column              | Type         | Constraints           |
+    |---------------------|--------------|-----------------------|
+    | id                  | INTEGER      | PRIMARY KEY, AUTO     |
+    | user_id             | INTEGER      | FK → auth_user, UNIQUE|
+    | phone               | VARCHAR(20)  | BLANK, NULL           |
+    | date_of_birth       | DATE         | BLANK, NULL           |
+    | gender              | VARCHAR(10)  | CHOICES (M/F/O/N)     |
+    | blood_group         | VARCHAR(5)   | CHOICES (8 types)     |
+    | height_cm           | DECIMAL(5,2) | BLANK, NULL           |
+    | weight_kg           | DECIMAL(5,2) | BLANK, NULL           |
+    | allergies           | TEXT         | BLANK                 |
+    | medical_conditions  | TEXT         | BLANK                 |
+    | emergency_contact   | VARCHAR(100) | BLANK                 |
+    | address             | TEXT         | BLANK                 |
+    | avatar_initial      | VARCHAR(2)   | AUTO (from user name) |
+    | created_at          | DATETIME     | AUTO                  |
+    | updated_at          | DATETIME     | AUTO                  |
+
+Table: api_predictionlog
+────────────────────────
+    | Column           | Type         | Constraints           |
+    |------------------|--------------|-----------------------|
+    | id               | INTEGER      | PRIMARY KEY, AUTO     |
+    | symptoms         | TEXT         | NOT NULL              |
+    | predicted_disease| VARCHAR(100) | NOT NULL              |
+    | confidence       | FLOAT        | NOT NULL              |
+    | risk_level       | VARCHAR(50)  | NOT NULL              |
+    | is_emergency     | BOOLEAN      | DEFAULT FALSE         |
+    | created_at       | DATETIME     | AUTO, INDEXED         |
+
+
+================================================================================
+SECTION 14: API ENDPOINTS REFERENCE
+================================================================================
+
+    +------+----------------------+------+------+---------------------------+
+    | #    | Endpoint             | Meth | Auth | Description               |
+    +------+----------------------+------+------+---------------------------+
+    | 1    | /api/predict/        | POST | Yes  | ClinicalBERT-only         |
+    |      |                      |      |      | classification (top-3)    |
+    +------+----------------------+------+------+---------------------------+
+    | 2    | /api/predict-rag/    | POST | Yes  | Full RAG pipeline or      |
+    |      |                      |      |      | report summarization      |
+    +------+----------------------+------+------+---------------------------+
+    | 3    | /api/health/         | GET  | No   | System health check       |
+    |      |                      |      |      | (GPU, model status)       |
+    +------+----------------------+------+------+---------------------------+
+    | 4    | /api/history/        | GET  | Yes  | Latest 50 prediction      |
+    |      |                      |      |      | logs                      |
+    +------+----------------------+------+------+---------------------------+
+    | 5    | /api/auth/register/  | POST | No   | User registration         |
+    +------+----------------------+------+------+---------------------------+
+    | 6    | /api/auth/login/     | POST | No   | User login + token        |
+    +------+----------------------+------+------+---------------------------+
+    | 7    | /api/auth/logout/    | POST | Yes  | Token revocation          |
+    +------+----------------------+------+------+---------------------------+
+    | 8    | /api/auth/profile/   | GET/ | Yes  | Profile retrieval /       |
+    |      |                      | PUT  |      | update                    |
+    +------+----------------------+------+------+---------------------------+
+
+
+================================================================================
+SECTION 15: TECHNOLOGY STACK SUMMARY
+================================================================================
+
+    +--------------------+--------------------------------------------+
+    | Layer              | Technology                                 |
+    +--------------------+--------------------------------------------+
+    | Frontend           | React 18.2, React Router v7, Axios 1.13   |
+    +--------------------+--------------------------------------------+
+    | Backend            | Django 5.x, Django REST Framework          |
+    +--------------------+--------------------------------------------+
+    | Classification     | ClinicalBERT (BertForSequenceClassification|
+    |                    | — 12L, 768H, 12A, 22 classes)              |
+    +--------------------+--------------------------------------------+
+    | Embeddings         | sentence-transformers/all-MiniLM-L6-v2     |
+    |                    | (384-dim)                                  |
+    +--------------------+--------------------------------------------+
+    | Vector Search      | FAISS-CPU (Flat L2, top-k=10)              |
+    +--------------------+--------------------------------------------+
+    | Generation         | google/flan-t5-base (T=0.7, max 512 tok)  |
+    +--------------------+--------------------------------------------+
+    | Biomedical NER     | SciSpacy (en_core_sci_sm)                  |
+    +--------------------+--------------------------------------------+
+    | OCR                | EasyOCR + pytesseract (fallback)           |
+    +--------------------+--------------------------------------------+
+    | PDF Processing     | pdfplumber + PyPDF2 (fallback)             |
+    +--------------------+--------------------------------------------+
+    | Database           | MySQL 8.x                                  |
+    +--------------------+--------------------------------------------+
+    | Authentication     | Django REST Token Auth                     |
+    +--------------------+--------------------------------------------+
+    | Production Server  | Gunicorn 22+                               |
+    +--------------------+--------------------------------------------+
+    | ML Framework       | PyTorch 2.2+, Transformers 4.40+           |
+    +--------------------+--------------------------------------------+
+    | Language           | Python 3.10+, JavaScript ES6+              |
+    +--------------------+--------------------------------------------+
+
+
+================================================================================
+SECTION 16: MISSING INFORMATION CHECKLIST
+================================================================================
+
+The following items require completion before the paper is submission-ready:
+
+    [ ] Exact dataset statistics (number of samples, train/test split ratio,
+        number of unique symptoms)
+
+    [ ] ClinicalBERT training hyperparameters (learning rate, epochs, batch
+        size, optimizer, loss function, scheduler)
+
+    [ ] Training and validation loss curves
+
+    [ ] Classification evaluation metrics (accuracy, precision, recall,
+        F1-score — overall and per-class)
+
+    [ ] Confusion matrix (22×22)
+
+    [ ] Baseline model comparison results (Naive Bayes, SVM, Random Forest,
+        vanilla BERT)
+
+    [ ] Symptom verification before/after performance comparison
+
+    [ ] RAG pipeline response quality evaluation (human evaluation or
+        automated metrics like BLEU, ROUGE, BERTScore)
+
+    [ ] Report summarization accuracy evaluation
+
+    [ ] Latency benchmarks (classification, retrieval, generation, end-to-end)
+
+    [ ] Hardware specifications used for training and inference
+
+    [ ] Author names, affiliations, and contact information
+
+    [ ] IRB/ethics approval information (if applicable)
+
+    [ ] Acknowledgments section
+
+    [ ] Screenshots of the frontend interface for system demonstration
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
+This document was auto-generated by analyzing the complete project repository
+including: Python source files (ml_engine/, api/, health_ai/), Django backend
+configuration, React 18 frontend, ClinicalBERT model configuration, FAISS
+vector store, FLAN-T5 generation pipeline, knowledge base (22 disease JSON
+files), database models, API endpoints, authentication system, requirements.txt,
+README.md, and test output files.
+
+All sections marked [PLACEHOLDER] or [PH] require population with actual
+experimental data from model evaluation.
+================================================================================

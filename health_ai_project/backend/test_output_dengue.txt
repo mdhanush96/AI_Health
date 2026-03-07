@@ -1,0 +1,67 @@
+🏥 Likely Condition: Dengue
+
+Dengue is a significant global public health concern, particularly in tropical and subtropical regions, caused by the dengue virus (DENV) and transmitted primarily by Aedes aegypti mosquitoes. This mosquito-borne viral infection affects an estimated 390 million people annually, with a substantial number of cases leading to severe illness and mortality. The disease ranges from asymptomatic infection to a severe, life-threatening condition known as severe dengue or dengue hemorrhagic fever (DHF). A comprehensive understanding of dengue, including its overview, symptoms, causes, treatment, and when to seek medical attention, is crucial for effective prevention and management.
+
+Causes:
+  • Viral serotypes and genotypes — The four distinct serotypes and their genetic diversity influence epidemic potential and disease severity
+  • Vector ecology — Aedes aegypti mosquitoes are well-adapted to urban environments, breeding in domestic water containers, making urban areas particularly vulnerable. Climate change and urbanization expand the vector's range
+  • Host immune response — Previous infection with one serotype can lead to ADE upon subsequent infection with a different serotype, increasing the risk of severe disease
+  • Host factors — Age, genetic background, and comorbidities such as obesity and diabetes can influence disease severity. Individuals with compromised immune systems tend to experience more severe forms of the disease
+  • Pathogenesis mechanisms — The dengue virus's interaction with the host immune system and its ability to induce plasma leakage are critical to severe disease development. The viral protein NS1 is known to disrupt endothelial junctions, contributing to capillary leakage
+
+Common Symptoms:
+  • High-grade fever, often with a biphasic pattern
+  • Severe headache, particularly retro-orbital pain
+  • Myalgia (muscle pain) and arthralgia (joint pain), leading to the moniker "breakbone fever"
+  • Rash, which can be maculopapular or morbilliform, often appearing between days 3 and 5 of the illness
+  • Nausea and vomiting
+  • Mild hemorrhagic manifestations, such as petechiae or gingival bleeding. A significant proportion of infections, estimated to be about 25%, are asymptomatic. However, in some cases, the disease can progress to severe dengue, characterized by specific…
+  • Abdominal pain or tenderness
+  • Persistent vomiting
+  • Clinical fluid accumulation (e.g., ascites, pleural effusion)
+  • Mucosal bleeding
+  • High Fever
+  • Severe Headache
+
+Possible Complications:
+  The disease ranges from asymptomatic infection to a severe, life-threatening condition known as severe dengue or dengue hemorrhagic fever (DHF).
+
+Lifestyle & Dietary Recommendations:
+  • Rest and oral rehydration to prevent dehydration
+  • Antipyretics like acetaminophen (paracetamol) to manage fever. Nonsteroidal anti-inflammatory drugs (NSAIDs) and aspirin should be avoided due to the increased risk of bleeding
+  • Close outpatient monitoring for warning signs. Patients exhibiting warning signs or those at higher risk (e.g., pregnant individuals, elderly, those with chronic conditions) require hospital admission for more intensive monitoring and management. Thi…
+  • Intravenous fluid administration (isotonic crystalloids like Ringer's lactate or normal saline) to correct plasma leakage and maintain adequate hydration. Careful fluid management is crucial to avoid both under-resuscitation, which can lead to shock,…
+  • Serial monitoring of hematocrit, platelet count, and vital signs. A rapidly rising hematocrit with a falling platelet count is a key indicator of plasma leakage
+  • Blood product transfusions (e.g., platelets, fresh frozen plasma) are reserved for active, significant bleeding and are not recommended for low platelet counts alone. Research into specific anti-dengue small-molecule inhibitors and effective vaccines…
+
+When to Seek Medical Attention:
+  • Persistent high fever — lasting more than 2 days
+  • Any warning signs of severe dengue — which typically appear as the fever subsides (the critical phase), usually between days 3 and 7 of illness. These include:
+  • Severe abdominal pain or tenderness
+  • Persistent vomiting (three or more times in an hour, or four to five times in six hours)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔎 Other Possible Conditions:
+
+🏥 2. Migraine (12.2%)
+
+Aura symptoms usually develop gradually over 5-20 minutes and last less than 60 minutes. Headache Phase: This is the most recognized phase, characterized by moderate to severe throbbing or pulsating pain, often unilateral but can be bilateral. The pain usually lasts from 4 to 72 hours if untreated. Associated symptoms are common and include nausea, vomiting, photophobia (increased sensitivity to light), and phonophobia (increased sensitivity to sound).
+
+Common Symptoms:
+  • Headache
+  • Fatigue
+  • Weakness
+  • Migraine
+  • Nausea
+  • Vomiting
+
+💡 Preventive strategies aim to reduce.
+
+🏥 3. Hypertension (10.9%)
+
+Hypertension — limited information available in the knowledge base.
+
+💡 Consult a healthcare professional for proper evaluation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ This system provides informational guidance only. It is NOT a medical diagnosis. Always consult a qualified healthcare professional for proper evaluation and treatment.

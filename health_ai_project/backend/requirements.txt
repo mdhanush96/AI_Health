@@ -1,0 +1,37 @@
+# MedAI – Backend Dependencies (Production-Ready / Hybrid RAG)
+
+# Web Framework
+django>=5.0,<6.0
+djangorestframework>=3.15,<4.0
+django-cors-headers>=4.4
+
+# ML / AI – Core
+torch>=2.2
+transformers>=4.40
+sentencepiece>=0.2
+
+# Vector Search
+faiss-cpu>=1.7
+# For GPU FAISS: pip install faiss-gpu instead of faiss-cpu
+
+# File Processing (Medical Reports)
+PyPDF2>=3.0
+pdfplumber>=0.10
+Pillow>=10.0
+pytesseract>=0.3
+
+# Medical NLP / NER
+scispacy>=0.5
+spacy>=3.7
+
+# Scientific
+numpy>=1.24
+
+# Database (MySQL – optional)
+mysqlclient>=2.2
+
+# Production Server
+gunicorn>=22.0
+
+# Environment
+python-dotenv>=1.0

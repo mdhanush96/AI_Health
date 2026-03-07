@@ -1,0 +1,112 @@
+{
+  "cervical spondylosis": {
+    "description": "Cervical spondylosis is age-related wear and tear affecting the spinal disks in the neck.",
+    "common_symptoms": ["Neck pain", "Stiffness", "Headache", "Shoulder pain"],
+    "advice": "Practice good posture and consult a physician if pain persists."
+  },
+  "impetigo": {
+    "description": "Impetigo is a contagious bacterial skin infection common in children.",
+    "common_symptoms": ["Red sores", "Blisters", "Itching", "Honey-colored crust"],
+    "advice": "Maintain hygiene and seek medical treatment for antibiotics."
+  },
+  "urinary tract infection": {
+    "description": "A urinary tract infection (UTI) is an infection in any part of the urinary system.",
+    "common_symptoms": ["Burning urination", "Frequent urge to urinate", "Pelvic pain"],
+    "advice": "Drink plenty of fluids and consult a doctor for antibiotics."
+  },
+  "arthritis": {
+    "description": "Arthritis is inflammation of one or more joints causing pain and stiffness.",
+    "common_symptoms": ["Joint pain", "Swelling", "Stiffness", "Reduced motion"],
+    "advice": "Exercise gently and consult a physician for proper management."
+  },
+  "dengue": {
+    "description": "Dengue is a mosquito-borne viral infection causing high fever and severe body pain.",
+    "common_symptoms": ["High fever", "Severe headache", "Joint pain", "Skin rash"],
+    "advice": "Seek immediate medical care if high fever persists."
+  },
+  "common cold": {
+    "description": "The common cold is a viral infection affecting the nose and throat.",
+    "common_symptoms": ["Sneezing", "Runny nose", "Sore throat", "Mild fever"],
+    "advice": "Rest and stay hydrated. Consult a doctor if symptoms worsen."
+  },
+  "drug reaction": {
+    "description": "A drug reaction is an adverse response to medication.",
+    "common_symptoms": ["Skin rash", "Itching", "Swelling", "Fever"],
+    "advice": "Stop medication immediately and consult a healthcare professional."
+  },
+  "fungal infection": {
+    "description": "Fungal infections are caused by fungi affecting skin or other body parts.",
+    "common_symptoms": ["Itching", "Redness", "Skin peeling"],
+    "advice": "Use antifungal medication and maintain hygiene."
+  },
+  "malaria": {
+    "description": "Malaria is a mosquito-borne infectious disease caused by parasites.",
+    "common_symptoms": ["High fever", "Chills", "Sweating", "Headache"],
+    "advice": "Seek urgent medical attention for diagnosis and treatment."
+  },
+  "allergy": {
+    "description": "Allergy is an immune system reaction to foreign substances.",
+    "common_symptoms": ["Sneezing", "Itching", "Skin rash", "Watery eyes"],
+    "advice": "Avoid allergens and consult a doctor for antihistamines."
+  },
+  "bronchial asthma": {
+    "description": "Bronchial asthma is a chronic condition affecting airways causing breathing difficulty.",
+    "common_symptoms": ["Shortness of breath", "Wheezing", "Chest tightness"],
+    "advice": "Use prescribed inhalers and avoid triggers."
+  },
+  "varicose veins": {
+    "description": "Varicose veins are swollen twisted veins visible under the skin.",
+    "common_symptoms": ["Leg pain", "Swelling", "Visible veins"],
+    "advice": "Elevate legs and consult a doctor if pain increases."
+  },
+  "migraine": {
+    "description": "Migraine is a neurological disorder causing intense throbbing headaches.",
+    "common_symptoms": ["Severe headache", "Nausea", "Light sensitivity"],
+    "advice": "Rest in a dark room and consult a doctor if frequent."
+  },
+  "hypertension": {
+    "description": "Hypertension is a condition where blood pressure is persistently high.",
+    "common_symptoms": ["Headache", "Dizziness", "Blurred vision"],
+    "advice": "Monitor blood pressure regularly and consult a physician."
+  },
+  "gastroesophageal reflux disease": {
+    "description": "GERD is a digestive disorder where stomach acid irritates the food pipe.",
+    "common_symptoms": ["Heartburn", "Chest pain", "Acid reflux"],
+    "advice": "Avoid spicy food and consult a doctor if persistent."
+  },
+  "pneumonia": {
+    "description": "Pneumonia is an infection that inflames air sacs in one or both lungs.",
+    "common_symptoms": ["Fever", "Cough", "Chest pain", "Breathing difficulty"],
+    "advice": "Seek medical attention for antibiotics and proper care."
+  },
+  "psoriasis": {
+    "description": "Psoriasis is a chronic autoimmune skin disease.",
+    "common_symptoms": ["Red patches", "Scaly skin", "Itching"],
+    "advice": "Consult a dermatologist for appropriate treatment."
+  },
+  "diabetes": {
+    "description": "Diabetes is a metabolic disease causing high blood sugar levels.",
+    "common_symptoms": ["Frequent urination", "Increased thirst", "Fatigue"],
+    "advice": "Maintain healthy diet and consult a doctor regularly."
+  },
+  "jaundice": {
+    "description": "Jaundice is yellowing of the skin and eyes due to liver issues.",
+    "common_symptoms": ["Yellow skin", "Dark urine", "Fatigue"],
+    "advice": "Seek immediate medical evaluation."
+  },
+  "chicken pox": {
+    "description": "Chicken pox is a contagious viral infection causing itchy rash.",
+    "common_symptoms": ["Itchy rash", "Fever", "Fatigue"],
+    "advice": "Isolate and consult a doctor if severe."
+  },
+  "typhoid": {
+    "description": "Typhoid is a bacterial infection spread through contaminated food and water.",
+    "common_symptoms": ["High fever", "Weakness", "Abdominal pain"],
+    "advice": "Seek medical treatment for antibiotics."
+  },
+  "peptic ulcer disease": {
+    "description": "Peptic ulcer disease involves sores in the stomach lining.",
+    "common_symptoms": ["Stomach pain", "Bloating", "Nausea"],
+    "advice": "Avoid NSAIDs and consult a doctor for proper treatment."
+  }
+}
