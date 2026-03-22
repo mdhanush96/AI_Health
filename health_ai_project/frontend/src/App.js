@@ -188,12 +188,13 @@ function PublicOnly({ children }) {
 }
 
 function ChatPage() {
-  /* ── state ──────────────────────── */
-  const [conversations, setConversations] = useState(() => loadConversations());
-  const [activeId, setActiveId] = useState(() => {
+  /* ── always start on a fresh New Chat ── */
+  const [initChat] = useState(() => createConversation());
+  const [conversations, setConversations] = useState(() => {
     const saved = loadConversations();
-    return saved.length > 0 ? saved[0].id : null;
+    return [initChat, ...saved];
   });
+  const [activeId, setActiveId] = useState(initChat.id);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const lastUserRef = useRef(null);
@@ -201,9 +202,9 @@ function ChatPage() {
 
   useEffect(() => { injectStyles(); }, []);
 
-  /* persist on every change */
+  /* persist on every change – skip empty chats */
   useEffect(() => {
-    saveConversations(conversations);
+    saveConversations(conversations.filter((c) => c.messages.length > 0));
   }, [conversations]);
 
   /* scroll to latest user message */

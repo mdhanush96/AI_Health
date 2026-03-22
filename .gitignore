@@ -1,24 +1,56 @@
-# ========================
+# Only track health_ai_project folder in git
+/*
+!/health_ai_project/
+!/.gitignore
+
 # Python
-# ========================
+*.pyc
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-*.egg-info/
-dist/
-build/
-*.egg
+*.pyo
+*.pyd
 
-# Virtual environments
-.venv/
-venv/
-env/
-ENV/
-
-# ========================
 # Django
-# ========================
+*.log
+media/
+logs/
+.env
+.env.*
+
+# Node/React
+node_modules/
+# Additional Python
+health_ai_project/frontend/build/
+
+# Model files
+*.safetensors
+*.pth
+*.bin
+
+# Data
+*.jsonl
+health_ai_project/datasets/*.jsonl
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.bak
+*.swp
+*.tmp
+
+# Ignore backend database
+health_ai_project/backend/db.sqlite3
+
+# Ignore test outputs
+health_ai_project/backend/test_output*.txt
+*.pyo
+*.pyd
+
+# Additional Django
 db.sqlite3
 db.sqlite3-journal
 *.log
@@ -26,28 +58,44 @@ logs/
 media/
 staticfiles/
 
-# ========================
 # Environment & Secrets
-# ========================
 .env
+.env.*
 .env.local
-.env.*.local
+.env.development
 .env.production
 
-# ========================
-# Frontend (React)
-# ========================
+# Node/React
 node_modules/
+build/
 health_ai_project/frontend/build/
 
-# ========================
-# ML Model Files (too large for Git)
-# ========================
+# Model files
 *.safetensors
+*.pth
 *.bin
-*.pkl
-*.h5
-*.pt
+
+# Data
+*.jsonl
+datasets/*.jsonl
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.bak
+*.swp
+*.tmp
+
+# Ignore backend database
+health_ai_project/backend/db.sqlite3
+
+# Ignore test outputs
+health_ai_project/backend/test_output*.txt
 *.pth
 *.onnx
 clinicalbert-disease.zip

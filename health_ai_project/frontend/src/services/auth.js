@@ -49,25 +49,35 @@ api.interceptors.request.use((config) => {
 /* ── API calls ──────────────────────────────────────────── */
 
 export async function registerUser({ username, email, password, firstName, lastName }) {
-  const response = await api.post("/auth/register/", {
-    username,
-    email,
-    password,
-    first_name: firstName || "",
-    last_name: lastName || "",
-  });
-  const { token, user, profile } = response.data;
-  setToken(token);
-  saveUser({ ...user, ...profile });
-  return response.data;
+  try {
+    const response = await api.post("/auth/register/", {
+      username,
+      email,
+      password,
+      first_name: firstName || "",
+      last_name: lastName || "",
+    });
+    const { token, user, profile } = response.data;
+    setToken(token);
+    saveUser({ ...user, ...profile });
+    return response.data;
+  } catch (error) {
+    // Show backend error details
+    throw error.response?.data || { error: "Registration failed" };
+  }
 }
 
 export async function loginUser({ username, password }) {
-  const response = await api.post("/auth/login/", { username, password });
-  const { token, user, profile } = response.data;
-  setToken(token);
-  saveUser({ ...user, ...profile });
-  return response.data;
+  try {
+    const response = await api.post("/auth/login/", { username, password });
+    const { token, user, profile } = response.data;
+    setToken(token);
+    saveUser({ ...user, ...profile });
+    return response.data;
+  } catch (error) {
+    // Show backend error details
+    throw error.response?.data || { error: "Login failed" };
+  }
 }
 
 export async function logoutUser() {

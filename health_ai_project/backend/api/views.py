@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -204,7 +204,9 @@ def _extract_and_combine(request, serializer):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
+@permission_classes([AllowAny])
 def predict_view(request):
     """
     POST /api/predict/
@@ -261,7 +263,9 @@ def predict_view(request):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
+@permission_classes([AllowAny])
 def predict_rag_view(request):
     """
     POST /api/predict-rag/
@@ -334,6 +338,8 @@ def predict_rag_view(request):
 
 
 @api_view(["GET"])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def health_check(request):
     """
     GET /api/health/
@@ -362,6 +368,8 @@ def health_check(request):
 
 
 @api_view(["GET"])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def prediction_history(request):
     """
     GET /api/history/
