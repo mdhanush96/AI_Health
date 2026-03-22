@@ -298,9 +298,12 @@ SECTION 6: METHODOLOGY
         11. Gastroesophageal Reflux     22. Varicose Veins
             Disease (GERD)
 
+    Total Samples   : 853
+    Train Samples   : 853
+    Test Samples    : 212
+    Unique Diseases : 22
     Features        : Symptom descriptions mapped to disease labels
     Labels          : 22 disease categories (multi-class classification)
-    Number of Symptoms : [PLACEHOLDER: exact count from dataset]
 
     The dataset maps textual symptom descriptions to disease labels,
     providing the training foundation for the ClinicalBERT classification
@@ -364,6 +367,17 @@ The data preprocessing pipeline consists of the following stages:
     accepts tokenized symptom descriptions as input and produces probability
     distributions over the 22 disease classes. The top-k (default k=3)
     predictions are returned with associated confidence scores.
+
+    Fine-Tuning Hyperparameters:
+        - Learning Rate     : 8e-6
+        - Batch Size         : 8
+        - Epochs             : 8
+        - Weight Decay       : 0.01
+        - Warmup Ratio       : 0.1
+        - FP16 Mixed Precision : True
+        - Optimizer          : AdamW (Hugging Face Trainer default)
+        - Loss Function      : CrossEntropyLoss (built-in to
+                               BertForSequenceClassification)
 
     Model Loading Strategy:
         - Thread-safe singleton pattern with double-check locking
@@ -1350,11 +1364,10 @@ SECTION 16: MISSING INFORMATION CHECKLIST
 
 The following items require completion before the paper is submission-ready:
 
-    [ ] Exact dataset statistics (number of samples, train/test split ratio,
-        number of unique symptoms)
+    [x] Exact dataset statistics (853 total, 853 train, 212 test, 22 diseases)
 
-    [ ] ClinicalBERT training hyperparameters (learning rate, epochs, batch
-        size, optimizer, loss function, scheduler)
+    [x] ClinicalBERT training hyperparameters (lr=8e-6, epochs=8, batch=8,
+        AdamW, CrossEntropyLoss, warmup_ratio=0.1, weight_decay=0.01, fp16)
 
     [ ] Training and validation loss curves
 
@@ -1387,6 +1400,48 @@ The following items require completion before the paper is submission-ready:
 
 
 ================================================================================
+SECTION 17: HOW TO GENERATE EVALUATION RESULTS
+================================================================================
+
+The following scripts have been created to fill in all [PLACEHOLDER] values
+in this document with real experimental data.
+
+Step 1 — Download the Dataset:
+    https://www.kaggle.com/datasets/choongqianzheng/disease-and-symptoms-dataset
+    Place the CSV file(s) in: health_ai_project/backend/data/
+
+Step 2 — Run ClinicalBERT Evaluation:
+    cd health_ai_project/backend
+    python evaluate_model.py --data data/
+
+    This generates:
+        - evaluation_results.txt (all metrics for Section 8)
+        - confusion_matrix.png  (Figure for Section 8)
+
+Step 3 — Run Baseline Comparison:
+    cd health_ai_project/backend
+    python baseline_comparison.py --data data/
+
+    This generates:
+        - baseline_results.txt  (comparison table for Section 8.2)
+        - model_comparison.png  (bar chart for Section 8)
+
+Step 4 — Generate Architecture Diagrams:
+    Open: health_ai_project/architecture_diagrams.md
+    Copy each Mermaid code block to https://mermaid.live
+    Export as PNG/SVG for your research paper figures.
+
+    7 diagrams provided:
+        Fig. 1: System Architecture (4-Layer)
+        Fig. 2: ML Pipeline Flowchart
+        Fig. 3: RAG Pipeline Detail
+        Fig. 4: ClinicalBERT Model Architecture
+        Fig. 5: Report Summarization Pipeline
+        Fig. 6: Database ER Diagram
+        Fig. 7: Authentication Flow Sequence
+
+
+================================================================================
                               END OF DOCUMENT
 ================================================================================
 
@@ -1398,5 +1453,6 @@ files), database models, API endpoints, authentication system, requirements.txt,
 README.md, and test output files.
 
 All sections marked [PLACEHOLDER] or [PH] require population with actual
-experimental data from model evaluation.
+experimental data from model evaluation. Use the scripts in Section 17 to
+generate these values.
 ================================================================================
