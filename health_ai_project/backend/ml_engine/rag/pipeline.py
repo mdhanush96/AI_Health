@@ -93,6 +93,11 @@ def _sanitize_text(text: str) -> str:
     text = re.sub(r'\s+,', ',', text)
     text = re.sub(r'\s{2,}', ' ', text).strip()
     text = re.sub(r'^[,;.\s]+', '', text)
+    words = re.findall(r"[A-Za-z]+", text.lower())
+    if len(words) >= 12:
+        most_common_ratio = max(words.count(word) for word in set(words)) / len(words)
+        if most_common_ratio >= 0.35:
+            return ""
     if text and text[-1] not in '.!?':
         text += '.'
     return text

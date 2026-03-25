@@ -36,21 +36,70 @@ const injectStyles = (() => {
 })();
 
 /* ── localStorage helpers ────────────────────────────────── */
-const STORAGE_KEY = "medai_conversations";
+function getConversationStorageKey(user) {
+  return user?.id ? `medai_conversations_user_${user.id}` : null;
+}
 
-function loadConversations() {
+function getActiveConversationStorageKey(user) {
+  return user?.id ? `medai_active_conversation_user_${user.id}` : null;
+}
+
+function loadConversations(storageKey) {
+  if (!storageKey) return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 }
 
-function saveConversations(convos) {
+function saveConversations(storageKey, convos) {
+  if (!storageKey) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(convos));
+    localStorage.setItem(storageKey, JSON.stringify(convos));
   } catch { /* quota exceeded – silently ignore */ }
+}
+
+function loadActiveConversationId(storageKey) {
+  if (!storageKey) return null;
+  try {
+    return localStorage.getItem(storageKey);
+  } catch {
+    return null;
+  }
+}
+
+function saveActiveConversationId(storageKey, activeId) {
+  if (!storageKey) return;
+  try {
+    if (activeId) {
+      localStorage.setItem(storageKey, activeId);
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  } catch { /* ignore storage errors */ }
+}
+
+function restoreChatState(storageKey, activeStorageKey) {
+  const saved = loadConversations(storageKey);
+  const savedActiveId = loadActiveConversationId(activeStorageKey);
+
+  if (saved.length > 0) {
+    const restoredActiveId = saved.some((c) => c.id === savedActiveId)
+      ? savedActiveId
+      : saved[0].id;
+    return {
+      conversations: saved,
+      activeId: restoredActiveId,
+    };
+  }
+
+  const freshChat = createConversation();
+  return {
+    conversations: [freshChat],
+    activeId: freshChat.id,
+  };
 }
 
 /* ── generate a short title from first user message ──────── */
@@ -188,13 +237,14 @@ function PublicOnly({ children }) {
 }
 
 function ChatPage() {
-  /* ── always start on a fresh New Chat ── */
-  const [initChat] = useState(() => createConversation());
-  const [conversations, setConversations] = useState(() => {
-    const saved = loadConversations();
-    return [initChat, ...saved];
-  });
-  const [activeId, setActiveId] = useState(initChat.id);
+  const { user } = useAuth();
+  const storageKey = getConversationStorageKey(user);
+  const activeStorageKey = getActiveConversationStorageKey(user);
+  const initialChatState = restoreChatState(storageKey, activeStorageKey);
+
+  const [conversations, setConversations] = useState(() => initialChatState.conversations);
+  const [activeId, setActiveId] = useState(() => initialChatState.activeId);
+  const [hydratedKey, setHydratedKey] = useState(() => storageKey);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const lastUserRef = useRef(null);
@@ -202,10 +252,23 @@ function ChatPage() {
 
   useEffect(() => { injectStyles(); }, []);
 
+  useEffect(() => {
+    const restored = restoreChatState(storageKey, activeStorageKey);
+    setConversations(restored.conversations);
+    setActiveId(restored.activeId);
+    setHydratedKey(storageKey);
+  }, [storageKey, activeStorageKey]);
+
   /* persist on every change – skip empty chats */
   useEffect(() => {
-    saveConversations(conversations.filter((c) => c.messages.length > 0));
-  }, [conversations]);
+    if (!storageKey || hydratedKey !== storageKey) return;
+    saveConversations(storageKey, conversations.filter((c) => c.messages.length > 0));
+  }, [conversations, storageKey, hydratedKey]);
+
+  useEffect(() => {
+    if (!activeStorageKey || hydratedKey !== storageKey) return;
+    saveActiveConversationId(activeStorageKey, activeId);
+  }, [activeId, activeStorageKey, hydratedKey, storageKey]);
 
   /* scroll to latest user message */
   const activeConvo = conversations.find((c) => c.id === activeId);
@@ -232,7 +295,13 @@ function ChatPage() {
     setConversations((prev) => {
       const next = prev.filter((c) => c.id !== id);
       if (id === activeId) {
-        setActiveId(next.length > 0 ? next[0].id : null);
+        if (next.length > 0) {
+          setActiveId(next[0].id);
+        } else {
+          const freshChat = createConversation();
+          setActiveId(freshChat.id);
+          return [freshChat];
+        }
       }
       return next;
     });
@@ -298,6 +367,20 @@ function ChatPage() {
           role: "bot",
           type: "summary",
           data,
+        };
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === targetId
+              ? { ...c, messages: [...c.messages, botMsg], updatedAt: Date.now() }
+              : c
+          )
+        );
+      } else if (data.response_type === "report_followup" || data.response_type === "report_reset") {
+        const botMsg = {
+          id: Date.now() + 1,
+          role: "bot",
+          type: "text",
+          text: data.message || data.response || "I couldn't find a report-based answer.",
         };
         setConversations((prev) =>
           prev.map((c) =>

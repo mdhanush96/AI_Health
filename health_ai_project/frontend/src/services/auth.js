@@ -62,8 +62,7 @@ export async function registerUser({ username, email, password, firstName, lastN
     saveUser({ ...user, ...profile });
     return response.data;
   } catch (error) {
-    // Show backend error details
-    throw error.response?.data || { error: "Registration failed" };
+    throw error;
   }
 }
 
@@ -75,8 +74,7 @@ export async function loginUser({ username, password }) {
     saveUser({ ...user, ...profile });
     return response.data;
   } catch (error) {
-    // Show backend error details
-    throw error.response?.data || { error: "Login failed" };
+    throw error;
   }
 }
 

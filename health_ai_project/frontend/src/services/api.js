@@ -14,6 +14,7 @@ const API_BASE = process.env.REACT_APP_API_URL;
 const api = axios.create({
   baseURL: API_BASE,
   timeout: 120000,  // RAG pipeline can take longer
+  withCredentials: true,
 });
 
 /* ── Response interceptor – handle stale/invalid tokens ──── */

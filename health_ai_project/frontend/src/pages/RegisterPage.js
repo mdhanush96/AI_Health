@@ -119,6 +119,16 @@ const s = {
     borderRadius: 8, padding: "10px 14px", fontSize: 13,
     color: "#dc2626", marginBottom: 16, display: "flex", alignItems: "center", gap: 8,
   },
+  errorContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  },
+  errorLink: {
+    color: "#b91c1c",
+    fontWeight: 700,
+    textDecoration: "underline",
+  },
   success: {
     backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0",
     borderRadius: 8, padding: "10px 14px", fontSize: 13,
@@ -142,6 +152,37 @@ function getPasswordStrength(pw) {
   return { level: 4, label: "Strong", color: "#22c55e" };
 }
 
+function getRegisterErrorState(err) {
+  const data = err?.response?.data || err;
+  const usernameError = data?.details?.username?.[0];
+  const emailError = data?.details?.email?.[0];
+  const passwordError = data?.details?.password?.[0];
+
+  if (emailError === "An account with this email already exists.") {
+    return {
+      message: "This email is already registered. Try logging in.",
+      showLoginLink: true,
+    };
+  }
+
+  if (usernameError === "This username is already taken.") {
+    return {
+      message: "This username is already taken. Try another one, or log in if it's yours.",
+      showLoginLink: true,
+    };
+  }
+
+  return {
+    message:
+      data?.error ||
+      usernameError ||
+      emailError ||
+      passwordError ||
+      "Registration failed. Please try again.",
+    showLoginLink: false,
+  };
+}
+
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -155,11 +196,13 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [showLoginLink, setShowLoginLink] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
     setError("");
+    setShowLoginLink(false);
   };
 
   const pwStrength = getPasswordStrength(form.password);
@@ -179,22 +222,27 @@ export default function RegisterPage() {
 
     if (!username.trim() || !email.trim() || !password) {
       setError("Please fill in all required fields.");
+      setShowLoginLink(false);
       return;
     }
     if (username.trim().length < 3) {
       setError("Username must be at least 3 characters.");
+      setShowLoginLink(false);
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Please enter a valid email address.");
+      setShowLoginLink(false);
       return;
     }
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
+      setShowLoginLink(false);
       return;
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setShowLoginLink(false);
       return;
     }
 
@@ -209,14 +257,9 @@ export default function RegisterPage() {
       });
       navigate("/", { replace: true });
     } catch (err) {
-      const data = err.response?.data;
-      const msg =
-        data?.error ||
-        data?.details?.username?.[0] ||
-        data?.details?.email?.[0] ||
-        data?.details?.password?.[0] ||
-        "Registration failed. Please try again.";
-      setError(msg);
+      const nextError = getRegisterErrorState(err);
+      setError(nextError.message);
+      setShowLoginLink(nextError.showLoginLink);
     } finally {
       setSubmitting(false);
     }
@@ -257,7 +300,15 @@ export default function RegisterPage() {
 
           {error && (
             <div style={s.error}>
-              <span>⚠️</span> {error}
+              <span>⚠️</span>
+              <div style={s.errorContent}>
+                <span>{error}</span>
+                {showLoginLink && (
+                  <Link to="/login" style={s.errorLink}>
+                    Go to Login
+                  </Link>
+                )}
+              </div>
             </div>
           )}
 

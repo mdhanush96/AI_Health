@@ -16,7 +16,7 @@ Each JSON file has the structure:
 
 import json
 import logging
-import os
+import re
 from pathlib import Path
 
 from ml_engine import config
@@ -33,6 +33,32 @@ _loaded = False
 def _normalize_name(name: str) -> str:
     """Lowercase + strip for consistent lookup keys."""
     return name.lower().strip()
+
+
+def _looks_corrupted_text(text: str) -> bool:
+    """
+    Detect obviously low-quality KB content such as a single word repeated
+    dozens of times. This keeps corrupted source files from leaking into
+    user-facing responses.
+    """
+    words = re.findall(r"[A-Za-z]+", text.lower())
+    if len(words) < 12:
+        return False
+
+    most_common_ratio = max(words.count(word) for word in set(words)) / len(words)
+    if most_common_ratio >= 0.35:
+        return True
+
+    repeated_run = 1
+    for idx in range(1, len(words)):
+        if words[idx] == words[idx - 1]:
+            repeated_run += 1
+            if repeated_run >= 6:
+                return True
+        else:
+            repeated_run = 1
+
+    return False
 
 
 def load_knowledge_base() -> dict[str, dict[str, str]]:
@@ -131,6 +157,13 @@ def get_disease_sections(disease_name: str) -> dict[str, str]:
     for orig_key, norm_key in section_map.items():
         value = raw.get(orig_key, "")
         if value and isinstance(value, str) and value.strip():
+            if _looks_corrupted_text(value):
+                logger.warning(
+                    "Skipping corrupted knowledge base section '%s' for disease '%s'",
+                    orig_key,
+                    disease_name,
+                )
+                continue
             normalised[norm_key] = value.strip()
 
     return normalised

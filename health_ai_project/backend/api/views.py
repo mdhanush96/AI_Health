@@ -32,6 +32,10 @@ from .serializers import (
 
 logger = logging.getLogger("api")
 
+REPORT_MODE_KEY = "report"
+REPORT_CONTEXT_SESSION_KEY = "report_context"
+REPORT_MODE_SESSION_KEY = "mode"
+
 
 # ---------------------------------------------------------------------------
 # Greeting / Non-Medical Input Detection
@@ -203,8 +207,170 @@ def _extract_and_combine(request, serializer):
     return cleaned_text, file_name, file_text, None
 
 
+def detect_query_type(query: str) -> str:
+    """
+    Classify the incoming query as report-based or symptom-based.
+    """
+    query = (query or "").lower().strip()
+    if not query:
+        return "symptom"
+
+    report_keywords = [
+        "medication", "medications", "medicine", "medicines", "tablet", "tablets",
+        "prescription", "report", "summary", "summarize my report", "summarise my report",
+        "my report", "my data", "based on report", "based on my report",
+        "what should i take", "what medicine", "what medicines", "what meds",
+        "condition in report", "diagnosis in report", "lab result", "lab results",
+        "test result", "test results", "what does my report say",
+    ]
+
+    for word in report_keywords:
+        if word in query:
+            return "report"
+
+    return "symptom"
+
+
+def _should_reset_report_mode(query: str) -> bool:
+    query = (query or "").lower()
+    return any(trigger in query for trigger in [
+        "new patient",
+        "clear report",
+        "reset report",
+        "exit report mode",
+    ])
+
+
+def _format_medication_entry(medication: dict | str) -> str:
+    if isinstance(medication, str):
+        return medication.strip()
+
+    if not isinstance(medication, dict):
+        return str(medication).strip()
+
+    parts = [medication.get("name", "").strip()]
+    if medication.get("dose"):
+        parts.append(str(medication["dose"]).strip())
+    if medication.get("frequency"):
+        parts.append(str(medication["frequency"]).strip())
+    return " ".join(part for part in parts if part).strip()
+
+
+def _store_report_context(request, summary_result: dict):
+    structured = summary_result.get("structured_data", {}) or {}
+    patient = structured.get("patient", {}) or {}
+    medications = [
+        formatted for formatted in
+        (_format_medication_entry(med) for med in structured.get("medications", []))
+        if formatted
+    ]
+
+    request.session[REPORT_CONTEXT_SESSION_KEY] = {
+        "patient_name": patient.get("name"),
+        "age": patient.get("age"),
+        "conditions": structured.get("conditions", []),
+        "medications": medications,
+        "summary": summary_result.get("summary", ""),
+        "file_name": summary_result.get("file_name"),
+        "report_length": summary_result.get("report_length", 0),
+    }
+    request.session[REPORT_MODE_SESSION_KEY] = REPORT_MODE_KEY
+    request.session.modified = True
+
+
+def _clear_report_context(request):
+    request.session[REPORT_CONTEXT_SESSION_KEY] = {}
+    request.session[REPORT_MODE_SESSION_KEY] = None
+    request.session.modified = True
+
+
+def handle_report_query(user_input: str, request):
+    context = request.session.get(REPORT_CONTEXT_SESSION_KEY, {}) or {}
+    summary = context.get("summary", "").strip()
+    medications = context.get("medications", []) or []
+    conditions = context.get("conditions", []) or []
+    patient_name = context.get("patient_name")
+    age = context.get("age")
+    query = (user_input or "").lower()
+
+    if not context:
+        return Response({
+            "response_type": "report_followup",
+            "message": (
+                "Please upload a medical report first so I can answer questions based on it."
+            ),
+        }, status=status.HTTP_200_OK)
+
+    if any(keyword in query for keyword in ["medication", "medications", "medicine", "medicines", "tablet", "tablets", "prescription", "what should i take", "what meds"]):
+        if medications:
+            med_list = "\n".join([f"- {med}" for med in medications])
+            return Response({
+                "response_type": "report_followup",
+                "message": (
+                    "Based on your uploaded medical report, these medications were listed:\n\n"
+                    f"{med_list}\n\n"
+                    "Please continue or change medicines only as advised by your doctor."
+                ),
+            }, status=status.HTTP_200_OK)
+
+        return Response({
+            "response_type": "report_followup",
+            "message": (
+                "I couldn't find any clear medication list in the stored report context. "
+                "You can ask me to summarize the report again or upload a clearer report."
+            ),
+        }, status=status.HTTP_200_OK)
+
+    if any(keyword in query for keyword in ["condition", "conditions", "diagnosis", "diagnoses", "problem", "problems"]):
+        if conditions:
+            condition_list = "\n".join([f"- {condition}" for condition in conditions])
+            return Response({
+                "response_type": "report_followup",
+                "message": (
+                    "Based on your uploaded medical report, these conditions were identified:\n\n"
+                    f"{condition_list}"
+                ),
+            }, status=status.HTTP_200_OK)
+
+    if any(keyword in query for keyword in ["name", "age", "patient"]):
+        patient_bits = []
+        if patient_name:
+            patient_bits.append(f"Name: {patient_name}")
+        if age:
+            patient_bits.append(f"Age: {age}")
+        if patient_bits:
+            return Response({
+                "response_type": "report_followup",
+                "message": "Stored patient details from your report:\n\n" + "\n".join(patient_bits),
+            }, status=status.HTTP_200_OK)
+
+    if any(keyword in query for keyword in ["summary", "summarize", "summarise", "report", "my data"]):
+        return Response({
+            "summary_type": "report_summary",
+            "file_name": context.get("file_name"),
+            "summary": summary or "No stored report summary is available yet.",
+            "structured_data": {},
+            "report_length": context.get("report_length", 0),
+            "latency_ms": 0,
+            "response_type": "report_followup",
+        }, status=status.HTTP_200_OK)
+
+    if summary:
+        return Response({
+            "response_type": "report_followup",
+            "message": f"Here is the stored report summary:\n\n{summary}",
+        }, status=status.HTTP_200_OK)
+
+    return Response({
+        "response_type": "report_followup",
+        "message": (
+            "I have your report context, but I couldn't find a direct answer for that question. "
+            "Try asking about medications, conditions, or ask me to summarize the report."
+        ),
+    }, status=status.HTTP_200_OK)
+
+
 @api_view(["POST"])
-@authentication_classes([])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 @permission_classes([AllowAny])
 def predict_view(request):
@@ -250,6 +416,7 @@ def predict_view(request):
     is_emergency = result.get("emergency") is not None
     try:
         PredictionLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
             symptoms=cleaned_text[:2000],
             predicted_disease=top["disease"],
             confidence=top["confidence"],
@@ -263,7 +430,6 @@ def predict_view(request):
 
 
 @api_view(["POST"])
-@authentication_classes([])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 @permission_classes([AllowAny])
 def predict_rag_view(request):
@@ -285,24 +451,53 @@ def predict_rag_view(request):
     if err:
         return err
 
+    symptoms_text = serializer.validated_data.get("symptoms", "").strip()
+    query_type = detect_query_type(symptoms_text)
+    mode = request.session.get(REPORT_MODE_SESSION_KEY)
+
+    if _should_reset_report_mode(symptoms_text):
+        _clear_report_context(request)
+        return Response({
+            "response_type": "report_reset",
+            "message": (
+                "Report mode has been cleared. You can upload a new report or ask about symptoms now."
+            ),
+        }, status=status.HTTP_200_OK)
+
     # Check for greetings / non-medical input before running ML pipeline
     if not file_name:
         greeting = detect_greeting(cleaned_text)
         if greeting:
             return Response(greeting, status=status.HTTP_200_OK)
 
-    # --- Report Summarization Mode ---
-    symptoms_text = serializer.validated_data.get("symptoms", "").strip()
-    if file_name and is_summary_request(symptoms_text, has_file=True):
+    # --- Report Context Mode ---
+    if file_name:
         try:
             summary_result = summarize_report(file_text, file_name)
-            return Response(summary_result, status=status.HTTP_200_OK)
+            _store_report_context(request, summary_result)
+
+            if is_summary_request(symptoms_text, has_file=True) or not symptoms_text:
+                return Response(summary_result, status=status.HTTP_200_OK)
+
+            if query_type == "report":
+                return handle_report_query(symptoms_text, request)
         except Exception:
             logger.exception("Report summarization failed")
             return Response(
                 {"error": "Failed to summarise the report. Please try again."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+    if mode == REPORT_MODE_KEY and query_type == "report":
+        return handle_report_query(symptoms_text, request)
+
+    if query_type == "report" and not request.session.get(REPORT_CONTEXT_SESSION_KEY):
+        return Response({
+            "response_type": "report_followup",
+            "message": (
+                "Please upload a medical report first so I can answer report-based questions."
+            ),
+        }, status=status.HTTP_200_OK)
 
     # --- Disease Prediction Mode ---
     try:
@@ -325,6 +520,7 @@ def predict_rag_view(request):
     is_emergency = result.get("emergency") is not None
     try:
         PredictionLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
             symptoms=cleaned_text[:2000],
             predicted_disease=top["disease"],
             confidence=top["confidence"],
@@ -368,14 +564,13 @@ def health_check(request):
 
 
 @api_view(["GET"])
-@authentication_classes([])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def prediction_history(request):
     """
     GET /api/history/
-    Returns recent prediction logs (latest 50).
+    Returns recent prediction logs for the authenticated user (latest 50).
     """
-    logs = PredictionLog.objects.all()[:50]
+    logs = PredictionLog.objects.filter(user=request.user)[:50]
     serializer = PredictionLogSerializer(logs, many=True)
     return Response({"history": serializer.data})
 
@@ -393,6 +588,7 @@ def register_view(request):
     """
     serializer = RegisterSerializer(data=request.data)
     if not serializer.is_valid():
+        logger.warning("Registration validation failed: %s", serializer.errors)
         return Response(
             {"error": "Registration failed", "details": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST,

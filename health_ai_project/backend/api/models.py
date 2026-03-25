@@ -58,6 +58,13 @@ class UserProfile(models.Model):
 class PredictionLog(models.Model):
     """Stores each prediction request and its result."""
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="prediction_logs",
+        null=True,
+        blank=True,
+    )
     symptoms = models.TextField(help_text="User-provided symptom description")
     predicted_disease = models.CharField(max_length=255)
     confidence = models.FloatField(help_text="Prediction confidence percentage")
@@ -71,4 +78,5 @@ class PredictionLog(models.Model):
         verbose_name_plural = "Prediction Logs"
 
     def __str__(self):
-        return f"{self.predicted_disease} ({self.confidence}%) – {self.created_at:%Y-%m-%d %H:%M}"
+        owner = self.user.username if self.user else "anonymous"
+        return f"{owner}: {self.predicted_disease} ({self.confidence}%) – {self.created_at:%Y-%m-%d %H:%M}"
